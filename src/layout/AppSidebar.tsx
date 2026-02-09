@@ -4,7 +4,7 @@ import { ImageUrl } from "../utils/Functions";
 // Assume these icons are imported from an icon library
 import { BiSolidChart } from "react-icons/bi";
 import { IoIosBriefcase } from "react-icons/io";
-import { MdOutlineCampaign } from "react-icons/md";
+// import { MdOutlineCampaign } from "react-icons/md";
 import { useSidebar } from "../context/SidebarContext";
 import {
   BoxCubeIcon,
@@ -22,17 +22,21 @@ import {
   PlugInIcon,
 } from "../icons";
 import {
-  CircleArrowOutUpRight,
-  CircleStar,
+  // CircleArrowOutUpRight,
+  // CircleStar,
+  Gift,
   List,
   ListCheck,
-  UsersRound,
 } from "lucide-react";
+import { useSelector } from "react-redux";
+import { LOYALTY_DASHBOARD_URL } from "../constants/api";
 
 type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
+  /** External URL (e.g. Loyalty Dashboard). When set, opens in new tab and passes JWT in hash for SSO. */
+  externalUrl?: string;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
@@ -42,7 +46,6 @@ const navItems: NavItem[] = [
     name: "Dashboard",
     path: "/",
   },
-
   {
     icon: <BiSolidChart />,
     name: "Business Profiles",
@@ -53,45 +56,50 @@ const navItems: NavItem[] = [
     name: "Events",
     path: "/events",
   },
-  {
-    icon: <UsersRound />,
-    name: "Customers",
-    path: "/customer",
-  },
+  // {
+  //   icon: <UsersRound />,
+  //   name: "Customers",
+  //   path: "/customer",
+  // },
   {
     icon: <List />,
     name: "Products",
     path: "/product-listing",
   },
-
   {
     icon: <ListCheck />,
     name: "Order Management",
     path: "/order-management",
   },
+  ...(LOYALTY_DASHBOARD_URL
+    ? [
+        {
+          icon: <Gift />,
+          name: "Loyalty Dashboard",
+          externalUrl: LOYALTY_DASHBOARD_URL,
+        },
+      ]
+    : []),
+  // {
+  //   icon: <MdOutlineCampaign />,
+  //   name: "Campaign Management",
+  //   path: "/campaign-management",
+  // },
+  // {
+  //   icon: <CircleArrowOutUpRight />,
+  //   name: "Analytics",
+  //   path: "/analytics",
+  // },
+  // {
+  //   icon: <CircleStar />,
+  //   name: "Rewards",
+  //   path: "/rewards",
+  // },
   // {
   //   icon: <FaHandshake />,
   //   name: "MY COLLABORATION",
   //   path: "/my-collaboration",
   // },
-
-  {
-    icon: <MdOutlineCampaign />,
-    name: "Campaign Management",
-    path: "/campaign-management",
-  },
-
-  {
-    icon: <CircleArrowOutUpRight />,
-    name: "Analytics",
-    path: "/analytics",
-  },
-
-  {
-    icon: <CircleStar />,
-    name: "Rewards",
-    path: "/rewards",
-  },
 ];
 
 const othersItems: NavItem[] = [
@@ -128,6 +136,7 @@ const othersItems: NavItem[] = [
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
+  const token = useSelector((state: any) => state.auth?.token);
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
@@ -234,6 +243,23 @@ const AppSidebar: React.FC = () => {
                 />
               )}
             </button>
+          ) : nav.externalUrl ? (
+            <a
+              href={
+                nav.externalUrl +
+                (token ? `#token=${encodeURIComponent(token)}` : "")
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="menu-item group menu-item-inactive"
+            >
+              <span className="menu-item-icon-size menu-item-icon-inactive">
+                {nav.icon}
+              </span>
+              {(isExpanded || isHovered || isMobileOpen) && (
+                <span className="menu-item-text">{nav.name}</span>
+              )}
+            </a>
           ) : (
             nav.path && (
               <Link

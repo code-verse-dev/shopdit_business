@@ -1,16 +1,19 @@
 import { ModuleRegistry } from "ag-grid-community";
 import { AllEnterpriseModule } from "ag-grid-enterprise";
 import { Button, Col, Pagination, Row } from "antd";
-import EventCard from "../../components/eventCard";
-import { useGetAllEventsQuery } from "../../redux/services/eventService";
-import usePagination from "../../utils/usePagination";
 import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import EventCard from "../../components/eventCard";
+import { useGetBusinessEventsQuery } from "../../redux/services/eventService";
+import usePagination from "../../utils/usePagination";
 
 ModuleRegistry.registerModules([AllEnterpriseModule]);
 
 const Events = () => {
+  const { user } = useSelector((state: any) => state.auth);
+  const businessId = user?._id;
   const { pageNumber, limit, totalDocs, handlePageChange, updateTotalDocs } =
-    usePagination(10); 
+    usePagination(10);
 
   const {
     data: eventsData,
@@ -18,7 +21,10 @@ const Events = () => {
     isFetching,
     isError,
     refetch,
-  } = useGetAllEventsQuery({ page: pageNumber, limit });
+  } = useGetBusinessEventsQuery(
+    { id: businessId!, page: pageNumber, limit },
+    { skip: !businessId }
+  );
 
   // update totalDocs whenever data changes
   useEffect(() => {

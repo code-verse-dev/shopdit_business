@@ -15,13 +15,16 @@ export const eventService = createApi({
   }),
   tagTypes: ["Events"],
   endpoints: (builder) => ({
-    getAllEvents: builder.query<any, { page?: number; limit?: number }>({
-      query: ({ page = 1, limit = 10 } = {}) =>
-        `/getAllEvents?page=${page}&limit=${limit}`,
+    getBusinessEvents: builder.query<
+      any,
+      { id: string; page?: number; limit?: number }
+    >({
+      query: ({ id, page = 1, limit = 10 }) =>
+        `/getBusinessEvents/${id}?page=${page}&limit=${limit}`,
       providesTags: ["Events"],
       transformErrorResponse,
     }),
   }),
 });
 
-export const { useGetAllEventsQuery } = eventService;
+export const { useGetBusinessEventsQuery } = eventService;

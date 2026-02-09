@@ -41,7 +41,7 @@ const UserManagement = () => {
 
   return (
     <>
-      <h1 className="text-2xl font-bold">Business Profiles</h1>
+      <h1 className="text-2xl font-bold py-2">Business Profiles</h1>
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
         <div className="max-w-full overflow-x-auto py-4">
           <Table>

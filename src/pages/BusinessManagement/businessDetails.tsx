@@ -29,7 +29,7 @@ const BusinessDetails: React.FC = () => {
           onClick={() => navigate(-1)}
           className="cursor-pointer mr-2"
         />
-        <h1 className="text-2xl font-bold">MY Business Detail</h1>
+        <h1 className="text-2xl font-bold">My Business Detail</h1>
       </div>
 
       {/* Banner */}
