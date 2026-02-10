@@ -13,7 +13,6 @@ import {
 } from "antd";
 
 const { Option } = Select;
-const { TextArea } = Input;
 
 interface CampaignFormValues {
   couponTitle: string;
