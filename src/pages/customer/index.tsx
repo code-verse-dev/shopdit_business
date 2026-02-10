@@ -1,6 +1,4 @@
-import {
-  ModuleRegistry
-} from "ag-grid-community";
+import { ModuleRegistry } from "ag-grid-community";
 import { AllEnterpriseModule } from "ag-grid-enterprise";
 import { Pagination } from "antd";
 import { useNavigate } from "react-router";
@@ -11,46 +9,43 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-
-interface Customer {
-  id: number;
-  name: string;
-  email: string;
-  segment: string;
-  total: string;
-  available: string;
-  lifetime: string;
-  lastActivity: string;
-}
-
-const tableData: Customer[] = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john@example.com",
-    segment: "Premium",
-    total: "1200",
-    available: "800",
-    lifetime: "1500",
-    lastActivity: "2025-11-01 10:30 AM",
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane@example.com",
-    segment: "Standard",
-    total: "950",
-    available: "650",
-    lifetime: "1100",
-    lastActivity: "2025-10-30 02:45 PM",
-  },
-];
+import { useSelector } from "react-redux";
+import { useGetBusinessCustomersQuery } from "../../redux/services/customerService";
+import usePagination from "../../utils/usePagination";
+import { useEffect } from "react";
 
 ModuleRegistry.registerModules([AllEnterpriseModule]);
 
 const Customer = () => {
   const navigate = useNavigate();
+  const user = useSelector((state: any) => state.auth.user);
+  const businessProfileId = user?.activeProfile;
 
+  const { pageNumber, limit, totalDocs, handlePageChange, updateTotalDocs } =
+    usePagination(10);
+
+  const { data, isLoading, isFetching, isError, refetch } =
+    useGetBusinessCustomersQuery(
+      { businessProfileId, page: pageNumber, limit },
+      { skip: !businessProfileId }
+    );
+
+  // update total docs whenever data changes
+  useEffect(() => {
+    if (data?.data?.totalDocs) {
+      updateTotalDocs(data.data.totalDocs);
+    }
+  }, [data?.data?.totalDocs, updateTotalDocs]);
+
+  // refetch when page or limit changes
+  useEffect(() => {
+    refetch();
+  }, [pageNumber, limit, refetch]);
+
+  const tableData = isFetching ? [] : data?.data?.customers || [];
+
+  if (isLoading) return <p>Loading customers...</p>;
+  if (isError) return <p>Failed to load customers.</p>;
   return (
     <>
       <div className="mb-6 flex items-center justify-between">
@@ -70,69 +65,104 @@ const Customer = () => {
             {/* Table Header */}
             <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
               <TableRow>
-                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs">
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs"
+                >
                   S.No
                 </TableCell>
-                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs">
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs"
+                >
                   Name
                 </TableCell>
-                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs">
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs"
+                >
                   Email
                 </TableCell>
-                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs">
-                  Segment
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs"
+                >
+                  Phone
                 </TableCell>
-                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs">
-                  Total
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs"
+                >
+                  Total Orders
                 </TableCell>
-                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs">
-                  Available
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs"
+                >
+                  Gender
                 </TableCell>
-                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs">
-                  Lifetime
-                </TableCell>
-                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs">
-                  Last Activity
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs"
+                >
+                  Last Order Date
                 </TableCell>
               </TableRow>
             </TableHeader>
 
             {/* Table Body */}
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-              {tableData.map((user, index) => (
-                <TableRow key={user.id}>
-                  <TableCell className="px-5 py-4 sm:px-6 text-start">
-                    #{index + 1}
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm">
-                    {user.name}
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm">
-                    {user.email}
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm">
-                    {user.segment}
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm">
-                    {user.total}
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm">
-                    {user.available}
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm">
-                    {user.lifetime}
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm">
-                    {user.lastActivity}
+              {isLoading ? (
+                <TableRow>
+                  <TableCell className="px-5 py-4">Loading...</TableCell>
+                </TableRow>
+              ) : tableData.length === 0 ? (
+                <TableRow>
+                  <TableCell className="px-5 py-4">
+                    No customers found
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                tableData.map((user: any, index: number) => (
+                  <TableRow key={user._id}>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start">
+                      #{index + 1}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm">
+                      {user?.user?.fullName}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm">
+                      {user?.user?.email}
+                    </TableCell>
+
+                    <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm">
+                      {user?.user?.phoneNumber || "N/A"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm">
+                      {user?.totalOrders}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm">
+                      {user?.user?.gender}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-700 text-start text-theme-sm">
+                      {new Date(user?.lastOrderDate).toLocaleDateString()}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
 
         <div className="p-4">
-          <Pagination align="end" defaultCurrent={1} total={50} />
+          <Pagination
+            align="end"
+            current={pageNumber}
+            pageSize={limit}
+            total={totalDocs}
+            onChange={handlePageChange}
+          />
         </div>
       </div>
     </>

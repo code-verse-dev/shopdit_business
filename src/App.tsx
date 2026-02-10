@@ -6,12 +6,11 @@ import SignUp from "./pages/AuthPages/SignUp";
 import VerificationCode from "./pages/AuthPages/VerificationCode";
 import Forgotpassword from "./pages/AuthPages/forgotpassword";
 import ResetPassword from "./pages/AuthPages/resetPassword";
-import BusinessProfile from "./pages/AuthPages/businessProfile";
 import SubscriptionPlan from "./pages/AuthPages/subscriptionPlan";
 import CampaignManagement from "./pages/campaign";
 import ViewCampaign from "./pages/campaign/viewCampaign";
 import CreateCampaign from "./pages/campaign/createCampaign";
-
+import PublicRoute from "./routes/publicRoute";
 import Blank from "./pages/Blank";
 import Calendar from "./pages/Calendar";
 import BarChart from "./pages/Charts/BarChart";
@@ -33,6 +32,7 @@ import { JSX } from "react";
 
 import BusinessManagement from "./pages/BusinessManagement";
 import BusinessDetails from "./pages/BusinessManagement/businessDetails";
+import CreateBusinessProfile from "./pages/BusinessManagement/createBusinessProfile";
 
 import Events from "./pages/events";
 
@@ -46,135 +46,134 @@ import OrderDetails from "./pages/orderManagement/orderDetails";
 import AddReward from "./pages/rewards/addReward";
 import AddProduct from "./pages/productListing/addProduct";
 import AddCustomer from "./pages/customer/addCustomer";
-
+import ProtectedRoute from "./routes/auth-route";
 
 interface RouteConfig {
   path: string;
   element: JSX.Element;
-  // roles?: Role[] | "all";
   title?: string;
   activeTab?: string;
 }
 
 const routesConfig: RouteConfig[] = [
-  // { path: "/signin", element: <Signin /> },
-  // { path: "/signup", element: <SignUp /> },
-  // { path: "/forgot-password", element: <ForgotPassword /> },
-  // { path: "/forgot-password-2", element: <ForgotPassword2 /> },
-  // { path: "/forgot-password-3", element: <ForgotPassword3 /> },
   {
     path: "/",
     element: <Home />,
-    // roles: "all",
+
     title: "Dashboard",
     activeTab: "dashboard",
   },
   {
     path: "/profile",
     element: <UserProfiles />,
-    // roles: "all",
+
     title: "profile",
   },
   {
     path: "/business-management",
     element: <BusinessManagement />,
-    // roles: "all",
-    title: "Business Management"
+
+    title: "Business Management",
   },
   {
     path: "/business-management/:id",
     element: <BusinessDetails />,
-    // roles: "all",
-    title: "Business Management"
+
+    title: "Business Management",
+  },
+  {
+    path: "/business-profile",
+    element: <CreateBusinessProfile />,
+
+    title: "Create Business Profile",
   },
   {
     path: "/events",
     element: <Events />,
-    // roles: "all",
+
     title: "Events And Add Event",
   },
   {
     path: "/my-collaboration",
     element: <MyCollaboration />,
-    // roles: "all",
-    title: "MY COLLABORATION"
+
+    title: "MY COLLABORATION",
   },
 
   {
     path: "/campaign-management",
     element: <CampaignManagement />,
-    // roles: "all",
-    title: "Campaign Management"
+
+    title: "Campaign Management",
   },
   {
     path: "/create-campaign",
-    element: <CreateCampaign/>,
-    // roles: "all",
-    title: "Campaign Management"
+    element: <CreateCampaign />,
+
+    title: "Campaign Management",
   },
   {
     path: "/campaign-management/:id",
     element: <ViewCampaign />,
-    // roles: "all",
-    title: "Campaign Management"
+
+    title: "Campaign Management",
   },
   {
     path: "/analytics",
-    element: <CampaignAnalytics/>,
-    // roles: "all",
-    title: "Analytics"
+    element: <CampaignAnalytics />,
+
+    title: "Analytics",
   },
 
-   {
+  {
     path: "/rewards",
-    element: <Rewards/>,
-    // roles: "all",
-    title: "Rewards"
+    element: <Rewards />,
+
+    title: "Rewards",
   },
   {
     path: "/add-reward",
-    element: <AddReward/>,
-    // roles: "all",
-    title: "Add Rewards"
+    element: <AddReward />,
+
+    title: "Add Rewards",
   },
-   {
+  {
     path: "/customer",
-    element: <Customer/>,
-    // roles: "all",
-    title: "Customer"
+    element: <Customer />,
+
+    title: "Customer",
   },
-   {
+  {
     path: "/add-customer",
-    element: <AddCustomer/>,
-    // roles: "all",
-    title: "Add Customer"
+    element: <AddCustomer />,
+
+    title: "Add Customer",
   },
-   {
+  {
     path: "/product-listing",
-    element: <ProductListing/>,
-    // roles: "all",
-    title: "Product Listing"
+    element: <ProductListing />,
+
+    title: "Product Listing",
   },
   {
     path: "/add-product",
-    element: <AddProduct/>,
-    // roles: "all",
-    title: "Add Product"
+    element: <AddProduct />,
+
+    title: "Add Product",
   },
 
   {
     path: "/order-management",
-    element: <OrderManagement/>,
-    // roles: "all",
-    title: "Order Management"
+    element: <OrderManagement />,
+
+    title: "Order Management",
   },
   {
     path: "/order-management/:id",
     element: <OrderDetails />,
-    // roles: "all",
-    title: "Campaign Management"
-  },
 
+    title: "Campaign Management",
+  },
 ];
 
 export default function App() {
@@ -184,24 +183,15 @@ export default function App() {
         <ScrollToTop />
         <Routes>
           <Route element={<AppLayout />}>
-            {/* {routesConfig?.map(({ path, element, roles }) => ( */}
             {routesConfig?.map(({ path, element }) => (
               <Route
                 key={path}
                 index={path === "/"}
                 path={path}
-                // element={
-                //   roles ? (
-                //     <ProtectedRoute roles={roles}>{element}</ProtectedRoute>
-                //   ) : (
-                //     element
-                //   )
-                // }
-                element={element}
+                element={<ProtectedRoute>{element}</ProtectedRoute>}
               />
             ))}
           </Route>
-
           <Route element={<AppLayout />}>
             {/* Others Page */}
 
@@ -226,15 +216,55 @@ export default function App() {
             <Route path="/line-chart" element={<LineChart />} />
             <Route path="/bar-chart" element={<BarChart />} />
           </Route>
-
           {/* Auth Layout */}
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/forgotpassword" element={<Forgotpassword />} />
-          <Route path="/verification-code" element={<VerificationCode />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/business-profile" element={<BusinessProfile />} />
-          <Route path="/subscription-plan" element={<SubscriptionPlan />} />
+          <Route
+            path="/signin"
+            element={
+              <PublicRoute>
+                <SignIn />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <PublicRoute>
+                <SignUp />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/forgotpassword"
+            element={
+              <PublicRoute>
+                <Forgotpassword />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/verification-code"
+            element={
+              <PublicRoute>
+                <VerificationCode />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              <PublicRoute>
+                <ResetPassword />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/subscription-plan"
+            element={
+              <PublicRoute>
+                <SubscriptionPlan />
+              </PublicRoute>
+            }
+          />
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />

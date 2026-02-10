@@ -3,91 +3,49 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import {
-  useGetMeQuery,
-  useUpdateProfileMutation,
-} from "../../redux/services/userSlice";
 import { useFormik } from "formik";
-import { SuccessPopup } from "../popup/Popup";
+import { SuccessPopup, ErrorPopup } from "../popup/Popup";
+import { useEditProfileMutation } from "../../redux/services/userSlice";
+import { useNavigate } from "react-router";
 
-const validate = (values: {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-}) => {
-  const errors: {
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    phone?: string;
-  } = {};
-  if (!values.firstName) {
-    errors.firstName = "Required";
-  } else if (values.firstName.length > 15) {
-    errors.firstName = "Must be 15 characters or less";
-  }
-
-  if (!values.lastName) {
-    errors.lastName = "Required";
-  } else if (values.lastName.length > 20) {
-    errors.lastName = "Must be 20 characters or less";
-  }
-
-  if (!values.email) {
-    errors.email = "Required";
-  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
-    errors.email = "Invalid email address";
-  }
-
-  if (values.phone && !/^\+?[1-9]\d{1,14}$/.test(values.phone)) {
-    errors.phone = "Invalid phone number";
-  }
-
+const validate = (values: { fullName: string; gender: string }) => {
+  const errors: { fullName?: string; gender?: string } = {};
+  if (!values.fullName) errors.fullName = "Required";
   return errors;
 };
 
-export default function UserInfoCard() {
-  const { data: userData, isLoading: isLoadingUserData } = useGetMeQuery();
+export default function UserInfoCard({ profile }: { profile: any }) {
   const { isOpen, openModal, closeModal } = useModal();
-  const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
-
+  const [editProfile, { isLoading }] = useEditProfileMutation();
+  const navigate = useNavigate();
   const formik = useFormik({
     initialValues: {
-      email: userData?.email ?? "",
-      firstName: userData?.firstName ?? "",
-      lastName: userData?.lastName ?? "",
-      phone: userData?.phone ?? "",
+      fullName: profile?.fullName ?? "",
+      gender: profile?.gender ?? "",
     },
     validate,
     onSubmit: async (values) => {
       try {
-        const { status } = await updateProfile(values).unwrap();
-        if (status) {
-          closeModal();
-          SuccessPopup("Profile updated successfully!");
-        }
-      } catch (error) {
-        console.error("Error updating profile:", error);
+        const formData = new FormData();
+        formData.append("fullName", values.fullName);
+        formData.append("gender", values.gender ?? "");
+
+        await editProfile(formData);
+        SuccessPopup("Profile updated successfully!");
+        closeModal();
+        navigate(0);
+      } catch (err: any) {
+        ErrorPopup("Failed to update profile");
+        console.error(err);
       }
     },
   });
 
-  const formikError = (key: keyof typeof formik.errors) => (
-    <>
-      {formik.errors[key] && formik.touched[key] && (
-        <p className="mt-1 text-sm text-red-600">
-          {typeof formik.errors[key] === "string" ? formik.errors[key] : null}
-        </p>
-      )}
-    </>
-  );
+  const formikError = (key: keyof typeof formik.errors) =>
+    formik.errors[key] && formik.touched[key] ? (
+      <p className="mt-1 text-sm text-red-600">{String(formik.errors[key])}</p>
+    ) : null;
 
-  // const handleSave = () => {
-  //   // Handle save logic here
-  //   console.log("Saving changes...");
-  //   closeModal();
-  // };
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -95,23 +53,13 @@ export default function UserInfoCard() {
           <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
             Personal Information
           </h4>
-
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                First Name
+                Full Name
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                {userData?.firstName}
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Last Name
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                {userData?.lastName ?? "-"}
+                {profile?.fullName ?? "-"}
               </p>
             </div>
 
@@ -120,25 +68,25 @@ export default function UserInfoCard() {
                 Email address
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                {userData?.email ?? "-"}
+                {profile?.email ?? "-"}
               </p>
             </div>
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Phone
+                Gender
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                {userData?.phone ?? "-"}
+                {profile?.gender ?? "-"}
               </p>
             </div>
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Role
+                Customer Id
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                {userData?.role}
+                {profile?.customerId ?? "-"}
               </p>
             </div>
           </div>
@@ -148,21 +96,6 @@ export default function UserInfoCard() {
           onClick={openModal}
           className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto"
         >
-          <svg
-            className="fill-current"
-            width="18"
-            height="18"
-            viewBox="0 0 18 18"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M15.0911 2.78206C14.2125 1.90338 12.7878 1.90338 11.9092 2.78206L4.57524 10.116C4.26682 10.4244 4.0547 10.8158 3.96468 11.2426L3.31231 14.3352C3.25997 14.5833 3.33653 14.841 3.51583 15.0203C3.69512 15.1996 3.95286 15.2761 4.20096 15.2238L7.29355 14.5714C7.72031 14.4814 8.11172 14.2693 8.42013 13.9609L15.7541 6.62695C16.6327 5.74827 16.6327 4.32365 15.7541 3.44497L15.0911 2.78206ZM12.9698 3.84272C13.2627 3.54982 13.7376 3.54982 14.0305 3.84272L14.6934 4.50563C14.9863 4.79852 14.9863 5.2734 14.6934 5.56629L14.044 6.21573L12.3204 4.49215L12.9698 3.84272ZM11.2597 5.55281L5.6359 11.1766C5.53309 11.2794 5.46238 11.4099 5.43238 11.5522L5.01758 13.5185L6.98394 13.1037C7.1262 13.0737 7.25666 13.003 7.35947 12.9002L12.9833 7.27639L11.2597 5.55281Z"
-              fill=""
-            />
-          </svg>
           Edit
         </button>
       </div>
@@ -178,40 +111,7 @@ export default function UserInfoCard() {
             </p>
           </div>
           <form className="flex flex-col" onSubmit={formik.handleSubmit}>
-            <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
-              {/* <div>
-                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Social Links
-                </h5>
-
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div>
-                    <Label>Facebook</Label>
-                    <Input
-                      type="text"
-                      value="https://www.facebook.com/PimjoHQ"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>X.com</Label>
-                    <Input type="text" value="https://x.com/PimjoHQ" />
-                  </div>
-
-                  <div>
-                    <Label>Linkedin</Label>
-                    <Input
-                      type="text"
-                      value="https://www.linkedin.com/company/pimjo"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Instagram</Label>
-                    <Input type="text" value="https://instagram.com/PimjoHQ" />
-                  </div>
-                </div>
-              </div> */}
+            <div className="custom-scrollbar h-[300px] overflow-y-auto px-2 pb-3">
               <div className="mt-7">
                 <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
                   Personal Information
@@ -219,64 +119,47 @@ export default function UserInfoCard() {
 
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-2 lg:col-span-1">
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="fullName">Full Name</Label>
                     <Input
-                      id="firstName"
-                      name="firstName"
+                      id="fullName"
+                      name="fullName"
                       type="text"
-                      value={formik.values.firstName}
+                      value={formik.values.fullName}
                       onChange={formik.handleChange}
-                      disabled={isLoadingUserData}
                     />
-                    {formikError("firstName")}
+                    {formikError("fullName")}
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
-                    <Label htmlFor="lastName">Last Name</Label>
+                    <Label htmlFor="gender">Gender</Label>
                     <Input
-                      id="lastName"
-                      name="lastName"
+                      id="gender"
+                      name="gender"
                       type="text"
-                      value={formik.values.lastName}
+                      value={formik.values.gender}
                       onChange={formik.handleChange}
-                      disabled={isLoadingUserData}
                     />
-                    {formikError("lastName")}
+                    {formikError("gender")}
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="text"
-                      value={formik.values.email}
-                      onChange={formik.handleChange}
-                      disabled={true}
-                    />
-                    {formikError("email")}
+                    <Label>Customer Id</Label>
+                    <Input value={profile?.customerId ?? "-"} disabled />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
-                    <Label htmlFor="phone">Phone</Label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      type="text"
-                      value={formik.values.phone}
-                      onChange={formik.handleChange}
-                      disabled={isLoadingUserData}
-                    />
-                    {formikError("phone")}
+                    <Label>Email Address</Label>
+                    <Input value={profile?.email ?? "-"} disabled />
                   </div>
                 </div>
               </div>
             </div>
+
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
               <Button size="sm" variant="outline" onClick={closeModal}>
                 Close
               </Button>
-              <Button size="sm" type="submit" disabled={isUpdating}>
+              <Button size="sm" type="submit" loading={isLoading}>
                 Save Changes
               </Button>
             </div>

@@ -2,8 +2,15 @@ import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import UserMetaCard from "../components/UserProfile/UserMetaCard";
 import UserInfoCard from "../components/UserProfile/UserInfoCard";
 import PageMeta from "../components/common/PageMeta";
+import { useSelector } from "react-redux";
+import { useGetMyProfileQuery } from "../redux/services/userSlice";
 
 export default function UserProfiles() {
+  const { user } = useSelector((state: any) => state.auth);
+  const { data: profile, isLoading } = useGetMyProfileQuery(user?._id);
+  console.log("data", profile);
+
+  if (isLoading) return <>Loading...</>;
   return (
     <>
       <PageMeta
@@ -16,9 +23,8 @@ export default function UserProfiles() {
           Profile
         </h3>
         <div className="space-y-6">
-          <UserMetaCard />
-          <UserInfoCard />
-          {/* <UserAddressCard /> */}
+          <UserMetaCard profile={profile?.data} />
+          <UserInfoCard profile={profile?.data} />
         </div>
       </div>
     </>

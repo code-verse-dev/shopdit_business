@@ -2,14 +2,15 @@ import { useState } from "react";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { Link } from "react-router";
-import { useGetMeQuery } from "../../redux/services/userSlice";
 import Cookies from "js-cookie";
 import { UPLOADS_URL } from "../../constants/api";
 import UserAvatar from "../UserProfile/UserAvatar";
+import { useSelector } from "react-redux";
 
 export default function UserDropdown() {
-  const { data: userData } = useGetMeQuery();
+  const { user } = useSelector((state: any) => state.auth);
   const [isOpen, setIsOpen] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   function toggleDropdown() {
     setIsOpen(!isOpen);
@@ -29,18 +30,19 @@ export default function UserDropdown() {
         className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
       >
         <span className="mr-3 overflow-hidden rounded-full h-11 w-11 border border-gray-200">
-          {userData?.image ? (
-            <img src={UPLOADS_URL + userData?.image} alt="user" />
-          ) : (
-            <UserAvatar
-              firstName={userData?.firstName}
-              lastName={userData?.lastName}
+          {user?.image && !imgError ? (
+            <img
+              src={UPLOADS_URL + user?.image}
+              alt="user"
+              onError={() => setImgError(true)}
             />
+          ) : (
+            <UserAvatar fullName={user?.fullName} />
           )}
         </span>
 
         <span className="block mr-1 font-medium text-theme-sm">
-          {userData?.firstName}
+          {user?.fullName}
         </span>
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
@@ -69,10 +71,10 @@ export default function UserDropdown() {
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            {userData?.firstName} {userData?.lastName}
+            {user?.fullName}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            {userData?.email}
+            {user?.email}
           </span>
         </div>
 

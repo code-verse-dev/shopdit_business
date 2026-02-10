@@ -1,40 +1,45 @@
 const { hostname } = window.location;
+
 const servers = {
-  local: "http://localhost:3032",
-  customDev: "https://react.customdev.solutions:3032",
+  local: "http://localhost:3011",
+  customDev: "http://react.customdev.solutions:3011",
   live: "",
-  live_test: "",
-  testing: "https://ldn26m62-3032.inc1.devtunnels.ms",
+  dummy: "https://9d2f-204-157-158-10.ngrok-free.app",
 };
+
 let URL;
-let publicUrl = "/";
-type Environment =
-  | "development"
-  | "customdev"
-  | "live"
-  | "testing"
-  | "live_test";
+
+type Environment = "development" | "customdev" | "live";
+
 let enviroment: Environment = "development";
+
+let publicUrl = "/";
+
 if (hostname.includes("react.customdev.solutions")) {
   URL = servers.customDev;
-  publicUrl = "/shopdit-business";
-  enviroment = "customdev";
-} else if (hostname.includes("m")) {
-  URL = servers.live_test;
-  enviroment = "live_test";
-} else if (hostname.includes("v")) {
-  URL = servers.live;
-  enviroment = "live";
-} else if (hostname.includes("devtunnels.ms")) {
-  URL = servers.testing;
-  enviroment = "testing";
-} else {
+} else if (hostname.includes("localhost")) {
   URL = servers.local;
-  enviroment = "development";
+} else if (hostname.includes("devtunnels.ms")) {
+  URL = servers.dummy;
+} else {
+  URL = servers.live;
 }
+
 export const SOCKET_URL = URL;
-export const STATIC_URL = servers.live + "/Uploads/static/";
-export const UPLOADS_URL = `${URL}/`;
+export const UPLOADS_URL = `https://react.customdev.solutions:3011/Uploads/`;
 export const BASE_URL = `${URL}/api`;
 export const PUBLIC_URL = publicUrl;
 export const ENV = enviroment;
+
+/**
+ * Loyalty Dashboard (separate frontend) base URL.
+ * When the user clicks "Loyalty Dashboard" in the sidebar, they are sent here
+ * with the current JWT in the URL hash so they land already authenticated.
+ * Set per environment (e.g. localhost for dev, production URL for live).
+ */
+export const LOYALTY_DASHBOARD_URL =
+  typeof import.meta.env?.VITE_LOYALTY_DASHBOARD_URL === "string"
+    ? import.meta.env.VITE_LOYALTY_DASHBOARD_URL.replace(/\/$/, "")
+    : hostname.includes("localhost")
+      ? "http://localhost:3000"
+      : "https://react.customdev.solutions/shopdit/loyalty-dash/";

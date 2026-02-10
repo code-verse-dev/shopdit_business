@@ -1,35 +1,50 @@
 import {
   EyeInvisibleOutlined,
-  EyeOutlined
+  EyeOutlined,
 } from "@ant-design/icons";
-import {
-  Button,
-  Checkbox,
-  Form,
-  Input,
-  Select
-} from "antd";
-import React from "react";
+import { Button, Checkbox, Form, Input, Select } from "antd";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { SuccessPopup, ErrorPopup } from "../popup/Popup";
+import { useSignupMutation } from "../../redux/services/authSlice";
 
 const { Option } = Select;
 
 interface SignUpFormValues {
   fullName: string;
-  lastName: string;
   email: string;
   gender: string;
   password: string;
   confirmPassword: string;
+  agreeTerms?: boolean;
 }
 
 const SignUpForm: React.FC = () => {
   const [form] = Form.useForm<SignUpFormValues>();
   const navigate = useNavigate();
+  const [signup, { isLoading }] = useSignupMutation();
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const handleSubmit = (values: SignUpFormValues) => {
-    console.log("Form Submitted:", values);
-    navigate("/login"); // static redirect after submit
+  const handleSubmit = async (values: SignUpFormValues) => {
+    if (!values.agreeTerms) {
+      form.setFields([{ name: "agreeTerms", errors: ["Please accept the terms"] }]);
+      return;
+    }
+    const formData = new FormData();
+    formData.append("email", values.email);
+    formData.append("fullName", values.fullName);
+    formData.append("gender", values.gender);
+    formData.append("password", values.password);
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
+    try {
+      await signup(formData).unwrap();
+      SuccessPopup("Account created. Please sign in.");
+      navigate("/signin");
+    } catch (err: any) {
+      ErrorPopup(err?.data?.message || "Sign up failed.");
+    }
   };
 
   return (
@@ -54,26 +69,13 @@ const SignUpForm: React.FC = () => {
           requiredMark={false}
           className="auth-form"
         >
-          {/* First + Last Name */}
-          <div className="form-row">
-            <Form.Item
-              name="fullName"
-              label="First Name*"
-              rules={[{ required: true, message: "Please enter your First name" }]}
-              className="form-col"
-            >
-              <Input placeholder="Enter First Name" className="web-input" />
-            </Form.Item>
-
-            <Form.Item
-              name="lastName"
-              label="Last Name*"
-              rules={[{ required: true, message: "Please enter Last Name" }]}
-              className="form-col"
-            >
-              <Input placeholder="Enter Last Name" className="web-input" />
-            </Form.Item>
-          </div>
+          <Form.Item
+            name="fullName"
+            label="Full Name*"
+            rules={[{ required: true, message: "Please enter your full name" }]}
+          >
+            <Input placeholder="Enter Full Name" className="web-input" />
+          </Form.Item>
 
           {/* Email + Gender */}
           <div className="form-row">
@@ -96,9 +98,9 @@ const SignUpForm: React.FC = () => {
               className="form-col"
             >
               <Select placeholder="Select Gender"  className="web-input">
-                <Option value="male">Male</Option>
-                <Option value="female">Female</Option>
-                <Option value="other">Other</Option>
+                <Option value="MALE">Male</Option>
+                <Option value="FEMALE">Female</Option>
+                <Option value="OTHER">Other</Option>
               </Select>
             </Form.Item>
           </div>
@@ -152,8 +154,30 @@ const SignUpForm: React.FC = () => {
             </Form.Item>
           </div>
 
-             {/* Privacy Policy */}
-             <Form.Item name="remember" valuePropName="checked" noStyle>
+          {/* Profile image (optional) */}
+          <Form.Item label="Profile photo" className="mb-2">
+            <Input
+              type="file"
+              accept="image/*"
+              className="web-input"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                setImageFile(file ?? null);
+              }}
+            />
+          </Form.Item>
+
+          {/* Terms */}
+          <Form.Item
+            name="agreeTerms"
+            valuePropName="checked"
+            rules={[
+              {
+                validator: (_, value) =>
+                  value ? Promise.resolve() : Promise.reject(new Error("Please accept the terms")),
+              },
+            ]}
+          >
             <Checkbox>
               By signing up, you are agreeing to our{" "}
               <Link
@@ -187,10 +211,10 @@ const SignUpForm: React.FC = () => {
               type="primary"
               htmlType="submit"
               block
+              loading={isLoading}
               className="mt-4 web-btn"
-              onClick={() => navigate("/business-profile")}
             >
-              Update Now
+              Create account
             </Button>
           </Form.Item>
 

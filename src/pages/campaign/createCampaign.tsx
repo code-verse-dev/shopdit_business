@@ -32,7 +32,7 @@ const CreateCampaign = () => {
 
   const handleSubmit = (values: CampaignFormValues) => {
     console.log("Form Submitted:", values);
-    navigate("/"); // redirect after submit
+    navigate("/");
   };
 
   return (
@@ -61,22 +61,15 @@ const CreateCampaign = () => {
                 <Form.Item
                   name="couponTitle"
                   label="Coupon Title"
-                  rules={[{ required: true, message: "Please enter Coupon Title" }]}
+                  rules={[
+                    { required: true, message: "Please enter Coupon Title" },
+                  ]}
                 >
-                  <Input placeholder="Enter Coupon Title"  className="web-input" />
+                  <Input
+                    placeholder="Enter Coupon Title"
+                    className="web-input"
+                  />
                 </Form.Item>
-
-                {/* 2 Coupon Description */}
-                <Form.Item
-                  name="couponDescription"
-                  label="Coupon Description"
-                  rules={[{ required: true, message: "Please enter Coupon Description" }]}
-                >
-                  <TextArea rows={4} placeholder="Enter Coupon Description" className="web-textarea" />
-                </Form.Item>
-                <p   className="text-[#F6075A] text-sm mb-4">
-                  (Will be displayed on the app and online ordering platform as coupon description.)
-                </p>
 
                 {/* 3 Background Image Upload */}
                 <Form.Item name="backgroundImage" label="Background Image">
@@ -97,9 +90,17 @@ const CreateCampaign = () => {
                 <Form.Item
                   name="maxCouponUser"
                   label="Max Coupon User"
-                  rules={[{ required: true, message: "Please select Max Coupon User" }]}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select Max Coupon User",
+                    },
+                  ]}
                 >
-                  <Select placeholder="Select max coupon user"  className="web-input">
+                  <Select
+                    placeholder="Select max coupon user"
+                    className="web-input"
+                  >
                     <Option value={1}>1</Option>
                     <Option value={5}>5</Option>
                     <Option value={10}>10</Option>
@@ -107,15 +108,21 @@ const CreateCampaign = () => {
                   </Select>
                 </Form.Item>
                 <p className="text-[#F6075A] text-sm mb-4">
-                  (Limit only one coupon for each user by setting this value to 1, a specific customer
-                  will not receive more coupons than the specific amount -1 is no limit)
+                  (Limit only one coupon for each user by setting this value to
+                  1, a specific customer will not receive more coupons than the
+                  specific amount -1 is no limit)
                 </p>
 
                 {/* 5 Coupon Availability Date & Hours */}
                 <Form.Item
                   name="availabilityDate"
                   label="Coupon Availability Date and Hours"
-                  rules={[{ required: true, message: "Please select availability date & time" }]}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select availability date & time",
+                    },
+                  ]}
                 >
                   <DatePicker showTime className="web-input w-full" />
                 </Form.Item>
@@ -124,9 +131,14 @@ const CreateCampaign = () => {
                 <Form.Item
                   name="expirationDate"
                   label="Expiration Date"
-                  rules={[{ required: true, message: "Please select expiration date" }]}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select expiration date",
+                    },
+                  ]}
                 >
-                  <DatePicker  className="web-input w-full" />
+                  <DatePicker className="web-input w-full" />
                 </Form.Item>
 
                 {/* 7 Advance Options */}
@@ -134,12 +146,32 @@ const CreateCampaign = () => {
                 <Form.Item name="options">
                   <Checkbox.Group>
                     <Row gutter={[12, 12]}>
-                      <Col><Checkbox value="sharing">Enable Sharing</Checkbox></Col>
-                      <Col><Checkbox value="referrals">Share only for referrals</Checkbox></Col>
-                      <Col><Checkbox value="donating">Enable Donating</Checkbox></Col>
-                      <Col><Checkbox value="online">Online only (no scanning/store level)</Checkbox></Col>
-                      <Col><Checkbox value="store">In store only (not available online)</Checkbox></Col>
-                      <Col><Checkbox value="original">Original user can only share</Checkbox></Col>
+                      <Col>
+                        <Checkbox value="sharing">Enable Sharing</Checkbox>
+                      </Col>
+                      <Col>
+                        <Checkbox value="referrals">
+                          Share only for referrals
+                        </Checkbox>
+                      </Col>
+                      <Col>
+                        <Checkbox value="donating">Enable Donating</Checkbox>
+                      </Col>
+                      <Col>
+                        <Checkbox value="online">
+                          Online only (no scanning/store level)
+                        </Checkbox>
+                      </Col>
+                      <Col>
+                        <Checkbox value="store">
+                          In store only (not available online)
+                        </Checkbox>
+                      </Col>
+                      <Col>
+                        <Checkbox value="original">
+                          Original user can only share
+                        </Checkbox>
+                      </Col>
                     </Row>
                   </Checkbox.Group>
                 </Form.Item>
@@ -151,16 +183,26 @@ const CreateCampaign = () => {
                 <Form.Item name="mediaChannels">
                   <Checkbox.Group>
                     <Row gutter={[12, 12]}>
-                      <Col><Checkbox value="email">Email</Checkbox></Col>
-                      <Col><Checkbox value="sms">SMS / MMS Message</Checkbox></Col>
-                      <Col><Checkbox value="push">Push Notification</Checkbox></Col>
+                      <Col>
+                        <Checkbox value="email">Email</Checkbox>
+                      </Col>
+                      <Col>
+                        <Checkbox value="sms">SMS / MMS Message</Checkbox>
+                      </Col>
+                      <Col>
+                        <Checkbox value="push">Push Notification</Checkbox>
+                      </Col>
                     </Row>
                   </Checkbox.Group>
                 </Form.Item>
 
                 {/* Submit */}
                 <Form.Item>
-                  <Button type="primary" htmlType="submit" className="mt-4 web-btn">
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    className="mt-4 web-btn"
+                  >
                     CREATE CAMPAIGN
                   </Button>
                 </Form.Item>

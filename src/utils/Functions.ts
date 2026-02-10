@@ -4,7 +4,7 @@ export const getBasename = () => {
   const { hostname } = window.location;
   let basename = "";
   if (hostname.includes("react.customdev.solutions")) {
-    basename = "/shopdit/admin";
+    basename = "/shopdit-business";
   }
   return basename;
 };

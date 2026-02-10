@@ -1,5 +1,5 @@
 import { ArrowLeftOutlined } from "@ant-design/icons";
-import { Button, Input, InputNumber, Select, DatePicker, message, Upload } from "antd";
+import { Button, Input, InputNumber, message, Upload } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { InboxOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router";
@@ -13,7 +13,7 @@ const AddProduct = () => {
   const uploadProps = {
     name: "file",
     multiple: false,
-    action: "https://www.mocky.io/v2/5cc8019d300000980a055e76", // Mock API for demo
+    action: "https://www.mocky.io/v2/5cc8019d300000980a055e76",
     onChange(info: any) {
       const { status } = info.file;
       if (status === "done") {
@@ -40,7 +40,9 @@ const AddProduct = () => {
       {/* Form Container */}
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
         <div className="max-w-full overflow-x-auto p-4">
-          <h2 className="text-2xl font-semibold dark:text-white">Product Details</h2>
+          <h2 className="text-2xl font-semibold dark:text-white">
+            Product Details
+          </h2>
 
           <div className="mt-6 md:w-2/4">
             <form>
@@ -59,38 +61,14 @@ const AddProduct = () => {
                   />
                 </div>
 
-                {/* Category */}
+                {/* Description */}
                 <div>
                   <Label className="font-semibold !text-black dark:!text-white">
-                    Category <span className="text-error-500">*</span>
+                    Description
                   </Label>
-                  <div className="web-input p-0 !h-[50px] flex items-center">
-                    <Select
-                      placeholder="Select Category"
-                      className="!bg-transparent !border-none !shadow-none w-full"
-                      size="large"
-                      allowClear
-                      bordered={false}
-                    >
-                      <Select.Option value="Electronics">Electronics</Select.Option>
-                      <Select.Option value="Wearables">Wearables</Select.Option>
-                      <Select.Option value="Audio">Audio</Select.Option>
-                      <Select.Option value="Accessories">Accessories</Select.Option>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* SKU */}
-                <div>
-                  <Label className="font-semibold !text-black dark:!text-white">
-                    SKU <span className="text-error-500">*</span>
-                  </Label>
-                  <Input
-                    placeholder="Enter SKU"
-                    name="sku"
-                    type="text"
-                    required
-                    className="web-input"
+                  <TextArea
+                    placeholder="Enter Product Description"
+                    className="w-full !h-[150px] !resize-none border border-gray-300 rounded-lg p-3 focus:border-[#00BD4E] focus:ring-1 focus:ring-[#00BD4E] outline-none"
                   />
                 </div>
 
@@ -103,7 +81,22 @@ const AddProduct = () => {
                     placeholder="Enter Product Price"
                     className="web-input w-full"
                     min={0}
+                    type="number"
                     prefix="$"
+                  />
+                </div>
+
+                {/* SKU */}
+                <div>
+                  <Label className="font-semibold !text-black dark:!text-white">
+                    Points Required <span className="text-error-500">*</span>
+                  </Label>
+                  <Input
+                    placeholder="Enter SKU"
+                    name="sku"
+                    type="number"
+                    required
+                    className="web-input"
                   />
                 </div>
 
@@ -119,44 +112,11 @@ const AddProduct = () => {
                   />
                 </div>
 
-                {/* Status */}
-                <div>
-                  <Label className="font-semibold !text-black dark:!text-white">
-                    Status <span className="text-error-500">*</span>
-                  </Label>
-                  <div className="web-input p-0 !h-[50px] flex items-center">
-                    <Select
-                      placeholder="Select Status"
-                      className="!bg-transparent !border-none !shadow-none w-full"
-                      size="large"
-                      allowClear
-                      bordered={false}
-                    >
-                      <Select.Option value="Active">Active</Select.Option>
-                      <Select.Option value="Inactive">Inactive</Select.Option>
-                      <Select.Option value="Out of Stock">Out of Stock</Select.Option>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Added On */}
-                <div>
-                  <Label className="font-semibold !text-black dark:!text-white">
-                    Added On <span className="text-error-500">*</span>
-                  </Label>
-                  <div className="web-input p-0 !h-[50px] flex items-center">
-                    <DatePicker
-                      className="!border-none !shadow-none w-full"
-                      size="large"
-                      placeholder="Select Added Date"
-                    />
-                  </div>
-                </div>
-
                 {/* Upload Product Image */}
                 <div>
                   <Label className="font-semibold !text-black dark:!text-white">
-                    Upload Product Image <span className="text-error-500">*</span>
+                    Upload Product Image{" "}
+                    <span className="text-error-500">*</span>
                   </Label>
                   <Dragger
                     {...uploadProps}
@@ -176,17 +136,6 @@ const AddProduct = () => {
                       Support for a single image upload only.
                     </p>
                   </Dragger>
-                </div>
-
-                {/* Description */}
-                <div>
-                  <Label className="font-semibold !text-black dark:!text-white">
-                    Description
-                  </Label>
-                  <TextArea
-                    placeholder="Enter Product Description"
-                    className="w-full !h-[150px] !resize-none border border-gray-300 rounded-lg p-3 focus:border-[#00BD4E] focus:ring-1 focus:ring-[#00BD4E] outline-none"
-                  />
                 </div>
 
                 {/* Buttons */}

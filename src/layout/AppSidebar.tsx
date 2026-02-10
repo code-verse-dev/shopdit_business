@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router";
-import { ImageUrl } from '../utils/Functions';
+import { Link, useLocation, useNavigate } from "react-router";
+import { ImageUrl } from "../utils/Functions";
+import { WarningPopup } from "../components/popup/Popup";
 // Assume these icons are imported from an icon library
 import { BiSolidChart } from "react-icons/bi";
-import { FaHandshake } from "react-icons/fa6";
 import { IoIosBriefcase } from "react-icons/io";
-import { MdOutlineCampaign } from "react-icons/md";
+// import { MdOutlineCampaign } from "react-icons/md";
 import { useSidebar } from "../context/SidebarContext";
 import {
   BoxCubeIcon,
@@ -20,14 +20,27 @@ import {
   // OrderIcon,
   // PayoutIcon,
   PieChartIcon,
-  PlugInIcon
+  PlugInIcon,
 } from "../icons";
-import { CircleArrowOutUpRight, CircleStar, List, ListCheck, UsersRound } from "lucide-react";
+import {
+  // CircleArrowOutUpRight,
+  // CircleStar,
+  Gift,
+  List,
+  ListCheck,
+} from "lucide-react";
+import { useSelector } from "react-redux";
+import { LOYALTY_DASHBOARD_URL } from "../constants/api";
+import { useGetBusinessProfilesQuery } from "../redux/services/businessService";
 
 type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
+  /** External URL (e.g. Loyalty Dashboard). When set, opens in new tab and passes JWT in hash for SSO. */
+  externalUrl?: string;
+  /** If true, navigation is blocked when user has no business profile; they are prompted and sent to dashboard. */
+  requireProfile?: boolean;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
@@ -37,59 +50,63 @@ const navItems: NavItem[] = [
     name: "Dashboard",
     path: "/",
   },
-  
   {
     icon: <BiSolidChart />,
-    name: "Business",
+    name: "Business Profiles",
     path: "/business-management",
   },
   {
     icon: <IoIosBriefcase />,
-    name: "Events And Add Event",
+    name: "Events",
     path: "/events",
   },
+  // {
+  //   icon: <UsersRound />,
+  //   name: "Customers",
+  //   path: "/customer",
+  // },
   {
-    icon: <FaHandshake />,
-    name: "MY COLLABORATION",
-    path: "/my-collaboration",
-  },
-  
-  
-  {
-    icon: <MdOutlineCampaign />,
-    name: "Campaign Management",
-    path: "/campaign-management",
-  },
-
-   {
-    icon: <CircleArrowOutUpRight />,
-    name: "Analytics",
-    path: "/analytics",
-  },
-
-  {
-    icon: <CircleStar/>,
-    name: "Rewards",
-    path: "/rewards",
-  },
-  {
-    icon: <UsersRound/>,
-    name: "Customer",
-    path: "/customer",
-  },
-  {
-    icon: <List/>,
-    name: "Product Listing",
+    icon: <List />,
+    name: "Products",
     path: "/product-listing",
+    requireProfile: true,
   },
-
   {
-    icon: <ListCheck/>,
+    icon: <ListCheck />,
     name: "Order Management",
     path: "/order-management",
+    requireProfile: true,
   },
-
-
+  ...(LOYALTY_DASHBOARD_URL
+    ? [
+        {
+          icon: <Gift />,
+          name: "Loyalty Dashboard",
+          externalUrl: LOYALTY_DASHBOARD_URL,
+          requireProfile: true,
+        },
+      ]
+    : []),
+  // {
+  //   icon: <MdOutlineCampaign />,
+  //   name: "Campaign Management",
+  //   path: "/campaign-management",
+  // },
+  // {
+  //   icon: <CircleArrowOutUpRight />,
+  //   name: "Analytics",
+  //   path: "/analytics",
+  // },
+  // {
+  //   icon: <CircleStar />,
+  //   name: "Rewards",
+  //   path: "/rewards",
+  // },
+  // {
+  //   icon: <FaHandshake />,
+  //   name: "MY COLLABORATION",
+  //   path: "/my-collaboration",
+  // },
 ];
 
 const othersItems: NavItem[] = [
@@ -124,8 +141,27 @@ const othersItems: NavItem[] = [
 ];
 
 const AppSidebar: React.FC = () => {
+  const navigate = useNavigate();
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
+  const token = useSelector((state: any) => state.auth?.token);
+  const businessId = useSelector((state: any) => state.auth?.user?._id);
+  const activeProfileId = useSelector(
+    (state: any) => state.auth?.user?.activeProfile
+  );
+
+  const { data: profilesData } = useGetBusinessProfilesQuery(
+    { businessId: businessId!, page: 1, limit: 1 },
+    { skip: !businessId }
+  );
+  const hasBusinessProfile =
+    (profilesData?.data?.docs?.length ?? 0) > 0;
+
+  const handleRequireProfileClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    WarningPopup("Please create a business profile first.");
+    navigate("/");
+  };
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
@@ -138,7 +174,8 @@ const AppSidebar: React.FC = () => {
 
   // const isActive = (path: string) => location.pathname === path;
   const isActive = useCallback(
-    (path: string) => location.pathname === path,
+    (path: string) =>
+      location.pathname === path || location.pathname.startsWith(path + "/"),
     [location.pathname]
   );
 
@@ -198,19 +235,22 @@ const AppSidebar: React.FC = () => {
           {nav.subItems ? (
             <button
               onClick={() => handleSubmenuToggle(index, menuType)}
-              className={`menu-item group ${openSubmenu?.type === menuType && openSubmenu?.index === index
-                ? "menu-item-active"
-                : "menu-item-inactive"
-                } cursor-pointer ${!isExpanded && !isHovered
+              className={`menu-item group ${
+                openSubmenu?.type === menuType && openSubmenu?.index === index
+                  ? "menu-item-active"
+                  : "menu-item-inactive"
+              } cursor-pointer ${
+                !isExpanded && !isHovered
                   ? "lg:justify-center"
                   : "lg:justify-start"
-                }`}
+              }`}
             >
               <span
-                className={`menu-item-icon-size  ${openSubmenu?.type === menuType && openSubmenu?.index === index
-                  ? "menu-item-icon-active"
-                  : "menu-item-icon-inactive"
-                  }`}
+                className={`menu-item-icon-size  ${
+                  openSubmenu?.type === menuType && openSubmenu?.index === index
+                    ? "menu-item-icon-active"
+                    : "menu-item-icon-inactive"
+                }`}
               >
                 {nav.icon}
               </span>
@@ -219,26 +259,77 @@ const AppSidebar: React.FC = () => {
               )}
               {(isExpanded || isHovered || isMobileOpen) && (
                 <ChevronDownIcon
-                  className={`ml-auto w-5 h-5 transition-transform duration-200 ${openSubmenu?.type === menuType &&
+                  className={`ml-auto w-5 h-5 transition-transform duration-200 ${
+                    openSubmenu?.type === menuType &&
                     openSubmenu?.index === index
-                    ? "rotate-180 text-brand-500"
-                    : ""
-                    }`}
+                      ? "rotate-180 text-brand-500"
+                      : ""
+                  }`}
                 />
               )}
             </button>
+          ) : nav.externalUrl ? (
+            nav.requireProfile && !hasBusinessProfile ? (
+              <button
+                type="button"
+                onClick={handleRequireProfileClick}
+                className="menu-item group menu-item-inactive w-full text-left"
+              >
+                <span className="menu-item-icon-size menu-item-icon-inactive">
+                  {nav.icon}
+                </span>
+                {(isExpanded || isHovered || isMobileOpen) && (
+                  <span className="menu-item-text">{nav.name}</span>
+                )}
+              </button>
+            ) : (
+              <a
+                href={
+                  nav.externalUrl +
+                  (token
+                    ? `#token=${encodeURIComponent(token)}${activeProfileId ? `&activeProfile=${encodeURIComponent(activeProfileId)}` : ""}`
+                    : "")
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="menu-item group menu-item-inactive"
+              >
+                <span className="menu-item-icon-size menu-item-icon-inactive">
+                  {nav.icon}
+                </span>
+                {(isExpanded || isHovered || isMobileOpen) && (
+                  <span className="menu-item-text">{nav.name}</span>
+                )}
+              </a>
+            )
           ) : (
-            nav.path && (
+            nav.path &&
+            (nav.requireProfile && !hasBusinessProfile ? (
+              <button
+                type="button"
+                onClick={handleRequireProfileClick}
+                className="menu-item group menu-item-inactive w-full text-left"
+              >
+                <span className="menu-item-icon-size menu-item-icon-inactive">
+                  {nav.icon}
+                </span>
+                {(isExpanded || isHovered || isMobileOpen) && (
+                  <span className="menu-item-text">{nav.name}</span>
+                )}
+              </button>
+            ) : (
               <Link
                 to={nav.path}
-                className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-                  }`}
+                className={`menu-item group ${
+                  isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                }`}
               >
                 <span
-                  className={`menu-item-icon-size ${isActive(nav.path)
-                    ? "menu-item-icon-active"
-                    : "menu-item-icon-inactive"
-                    }`}
+                  className={`menu-item-icon-size ${
+                    isActive(nav.path)
+                      ? "menu-item-icon-active"
+                      : "menu-item-icon-inactive"
+                  }`}
                 >
                   {nav.icon}
                 </span>
@@ -246,7 +337,7 @@ const AppSidebar: React.FC = () => {
                   <span className="menu-item-text">{nav.name}</span>
                 )}
               </Link>
-            )
+            ))
           )}
           {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
             <div
@@ -266,29 +357,32 @@ const AppSidebar: React.FC = () => {
                   <li key={subItem.name}>
                     <Link
                       to={subItem.path}
-                      className={`menu-dropdown-item ${isActive(subItem.path)
-                        ? "menu-dropdown-item-active"
-                        : "menu-dropdown-item-inactive"
-                        }`}
+                      className={`menu-dropdown-item ${
+                        isActive(subItem.path)
+                          ? "menu-dropdown-item-active"
+                          : "menu-dropdown-item-inactive"
+                      }`}
                     >
                       {subItem.name}
                       <span className="flex items-center gap-1 ml-auto">
                         {subItem.new && (
                           <span
-                            className={`ml-auto ${isActive(subItem.path)
-                              ? "menu-dropdown-badge-active"
-                              : "menu-dropdown-badge-inactive"
-                              } menu-dropdown-badge`}
+                            className={`ml-auto ${
+                              isActive(subItem.path)
+                                ? "menu-dropdown-badge-active"
+                                : "menu-dropdown-badge-inactive"
+                            } menu-dropdown-badge`}
                           >
                             new
                           </span>
                         )}
                         {subItem.pro && (
                           <span
-                            className={`ml-auto ${isActive(subItem.path)
-                              ? "menu-dropdown-badge-active"
-                              : "menu-dropdown-badge-inactive"
-                              } menu-dropdown-badge`}
+                            className={`ml-auto ${
+                              isActive(subItem.path)
+                                ? "menu-dropdown-badge-active"
+                                : "menu-dropdown-badge-inactive"
+                            } menu-dropdown-badge`}
                           >
                             pro
                           </span>
@@ -308,9 +402,10 @@ const AppSidebar: React.FC = () => {
   return (
     <aside
       className={`fixed mt-16 flex flex-col lg:mt-0 top-0 pr-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
-        ${isExpanded || isMobileOpen
-          ? "w-[290px]"
-          : isHovered
+        ${
+          isExpanded || isMobileOpen
+            ? "w-[290px]"
+            : isHovered
             ? "w-[290px]"
             : "w-[90px]"
         }
@@ -320,8 +415,9 @@ const AppSidebar: React.FC = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className={`py-6 hidden lg:flex lg:visible ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-center"
-          }`}
+        className={`py-6 hidden lg:flex lg:visible ${
+          !isExpanded && !isHovered ? "lg:justify-center" : "justify-center"
+        }`}
       >
         <Link to="/">
           {isExpanded || isHovered || isMobileOpen ? (
@@ -357,10 +453,11 @@ const AppSidebar: React.FC = () => {
           <div className="flex flex-col gap-4">
             <div>
               <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${!isExpanded && !isHovered
-                  ? "lg:justify-center"
-                  : "justify-start"
-                  }`}
+                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+                  !isExpanded && !isHovered
+                    ? "lg:justify-center"
+                    : "justify-start"
+                }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
                   ""

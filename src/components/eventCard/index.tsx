@@ -1,16 +1,22 @@
 import React from "react";
 import { Card, Image } from "antd";
-import { ImageUrl } from "../../utils/Functions";
+import { UPLOADS_URL } from "../../constants/api";
 
 interface EventCardProps {
   image: string;
   name: string;
-  subheading?: string; // ✅ new prop for small heading
+  subheading?: string;
   amount: number;
-  date?: string; // ✅ expected format: "2025-01-04"
+  date?: string;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ image, name, subheading, amount, date }) => {
+const EventCard: React.FC<EventCardProps> = ({
+  image,
+  name,
+  subheading,
+  amount,
+  date,
+}) => {
   // Format date into day + short month
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return { day: "", month: "" };
@@ -36,7 +42,7 @@ const EventCard: React.FC<EventCardProps> = ({ image, name, subheading, amount, 
             </div>
           )}
           <Image
-            src={ImageUrl(image)}
+            src={UPLOADS_URL + image}
             alt={name}
             preview={false}
             className="market-product-image"
@@ -47,7 +53,9 @@ const EventCard: React.FC<EventCardProps> = ({ image, name, subheading, amount, 
       <div className="market-product-content">
         <div className="market-product-text">
           <span className="market-product-name">{name}</span>
-          {subheading && <span className="market-product-subheading">{subheading}</span>}
+          {subheading && (
+            <span className="market-product-subheading">{subheading}</span>
+          )}
         </div>
         <span className="market-product-amount">
           <sup>$</sup>
