@@ -10,16 +10,7 @@ interface LoginBody {
   password: string;
 }
 
-interface SignupBody {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  phone: string;
-  businessName: string;
-}
-
-export const authService = createApi({
+const authServiceInstance = createApi({
   reducerPath: "authService",
   baseQuery: fetchBaseQuery({ baseUrl: BASE_URL, credentials: "include" }),
   tagTypes: ["Auth"],
@@ -33,15 +24,18 @@ export const authService = createApi({
       transformResponse: (response: any) => response.data,
     }),
 
-    signup: builder.mutation({
-      query: (body: SignupBody) => ({
+    signup: builder.mutation<any, FormData>({
+      query: (formData) => ({
         url: "/business/signup",
         method: "POST",
-        body,
+        body: formData,
       }),
-      transformResponse: (response: any) => response.data,
+      transformResponse: (response: any) => response?.data ?? response,
     }),
   }),
 });
+
+/** Business auth API (login, signup). */
+export const authService: typeof authServiceInstance = authServiceInstance;
 
 export const { useLoginMutation, useSignupMutation } = authService;

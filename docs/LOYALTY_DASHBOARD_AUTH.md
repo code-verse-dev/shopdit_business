@@ -6,34 +6,39 @@ When a user clicks **"Loyalty Dashboard"** in the Business Dashboard sidebar, th
 
 1. **Business Dashboard** (this app) builds the link as:
    ```
-   <LOYALTY_DASHBOARD_URL>#token=<JWT>
+   <LOYALTY_DASHBOARD_URL>#token=<JWT>&activeProfile=<PROFILE_ID>
    ```
-   The link opens in a new tab (`target="_blank"`).
+   The link opens in a new tab (`target="_blank"`). `activeProfile` is the currently active business profile ID so the Loyalty Dashboard can show stats for that profile only.
 
 2. **Loyalty Dashboard** (your frontend) must, on load:
-   - Read the token from the hash.
-   - Store it for API calls (e.g. cookie, localStorage, or memory).
-   - Remove the token from the URL so it is not visible in the address bar or history.
+   - Read the token and `activeProfile` from the hash.
+   - Store the token for API calls (e.g. cookie, localStorage, or memory).
+   - Store or use `activeProfile` for all loyalty API calls (so stats and data are scoped to that business profile).
+   - Remove the hash from the URL so tokens are not visible in the address bar or history.
 
 ## What the Loyalty Dashboard should do on load
 
 Run this (or equivalent) as early as possible in your app bootstrap (e.g. in `main.tsx` or your auth provider):
 
 ```javascript
-// 1. Parse hash: #token=eyJhbGc...
+// 1. Parse hash: #token=eyJhbGc...&activeProfile=profileId123
 const hash = window.location.hash?.slice(1) || '';
 const params = new URLSearchParams(hash);
 const token = params.get('token');
+const activeProfile = params.get('activeProfile');
 
 if (token) {
   // 2. Store the token the same way your app expects it (e.g. same cookie name as Business Dashboard)
-  // Option A: Cookie (so your API client can use credentials: 'include' or same cookie)
   document.cookie = `jwt=${encodeURIComponent(token)}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+  // Or: localStorage.setItem('jwt', token);
 
-  // Option B: Or use js-cookie / localStorage / Redux – whatever your Loyalty app uses for auth.
-  // localStorage.setItem('jwt', token);
+  // 3. Store activeProfile so your API calls use it (e.g. for stats, loyalty data)
+  if (activeProfile) {
+    sessionStorage.setItem('activeProfile', activeProfile);
+    // Or pass to your auth/context so all API requests include it (e.g. header or query param).
+  }
 
-  // 3. Remove token from URL (security & cleanliness)
+  // 4. Remove hash from URL (security & cleanliness)
   window.history.replaceState(null, '', window.location.pathname + window.location.search);
 }
 ```

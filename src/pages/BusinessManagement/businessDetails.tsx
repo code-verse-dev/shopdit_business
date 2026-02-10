@@ -7,7 +7,7 @@ import { UPLOADS_URL } from "../../constants/api";
 const BusinessDetails: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const business = location.state?.user;
+  const business = location.state?.profile ?? location.state?.user;
   console.log(business);
 
   // const images = [

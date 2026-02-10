@@ -42,4 +42,4 @@ export const LOYALTY_DASHBOARD_URL =
     ? import.meta.env.VITE_LOYALTY_DASHBOARD_URL.replace(/\/$/, "")
     : hostname.includes("localhost")
       ? "http://localhost:3000"
-      : "";
+      : "https://react.customdev.solutions/shopdit/loyalty-dash/";

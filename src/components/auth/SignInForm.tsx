@@ -31,7 +31,13 @@ export default function SignInForm() {
       const res: any = await login({ email, password }).unwrap();
       Cookies.set("jwt", res.token, { expires: 7 });
 
-      dispatch(setCredentials({ user: res.business, token: res.token }));
+      dispatch(
+        setCredentials({
+          user: res.business,
+          token: res.token,
+          businessProfiles: res.businessProfiles ?? [],
+        })
+      );
       setLoading(false);
       SuccessPopup(`Signed in as ${email}`);
       navigate("/");
@@ -124,7 +130,7 @@ export default function SignInForm() {
                     className="auth-link"
                     onClick={() => navigate("/signup")}
                   >
-                    SIGN IN
+                    SIGN UP
                   </Button>
                 </div>
               </div>

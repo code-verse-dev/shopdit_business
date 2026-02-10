@@ -6,7 +6,6 @@ import SignUp from "./pages/AuthPages/SignUp";
 import VerificationCode from "./pages/AuthPages/VerificationCode";
 import Forgotpassword from "./pages/AuthPages/forgotpassword";
 import ResetPassword from "./pages/AuthPages/resetPassword";
-import BusinessProfile from "./pages/AuthPages/businessProfile";
 import SubscriptionPlan from "./pages/AuthPages/subscriptionPlan";
 import CampaignManagement from "./pages/campaign";
 import ViewCampaign from "./pages/campaign/viewCampaign";
@@ -33,6 +32,7 @@ import { JSX } from "react";
 
 import BusinessManagement from "./pages/BusinessManagement";
 import BusinessDetails from "./pages/BusinessManagement/businessDetails";
+import CreateBusinessProfile from "./pages/BusinessManagement/createBusinessProfile";
 
 import Events from "./pages/events";
 
@@ -80,6 +80,12 @@ const routesConfig: RouteConfig[] = [
     element: <BusinessDetails />,
 
     title: "Business Management",
+  },
+  {
+    path: "/business-profile",
+    element: <CreateBusinessProfile />,
+
+    title: "Create Business Profile",
   },
   {
     path: "/events",
@@ -248,14 +254,6 @@ export default function App() {
             element={
               <PublicRoute>
                 <ResetPassword />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/business-profile"
-            element={
-              <PublicRoute>
-                <BusinessProfile />
               </PublicRoute>
             }
           />

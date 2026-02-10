@@ -31,7 +31,20 @@ export const userSlice = createApi({
       transformErrorResponse,
       invalidatesTags: ["Profile"],
     }),
+    setActiveProfile: builder.mutation<any, { profileId: string }>({
+      query: (body) => ({
+        url: `/setActiveProfile`,
+        method: "PUT",
+        body,
+      }),
+      transformErrorResponse,
+      invalidatesTags: ["Profile"],
+    }),
   }),
 });
 
-export const { useEditProfileMutation, useGetMyProfileQuery } = userSlice;
+export const {
+  useEditProfileMutation,
+  useGetMyProfileQuery,
+  useSetActiveProfileMutation,
+} = userSlice;

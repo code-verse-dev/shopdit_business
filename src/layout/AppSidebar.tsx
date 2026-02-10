@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { ImageUrl } from "../utils/Functions";
+import { WarningPopup } from "../components/popup/Popup";
 // Assume these icons are imported from an icon library
 import { BiSolidChart } from "react-icons/bi";
 import { IoIosBriefcase } from "react-icons/io";
@@ -30,6 +31,7 @@ import {
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { LOYALTY_DASHBOARD_URL } from "../constants/api";
+import { useGetBusinessProfilesQuery } from "../redux/services/businessService";
 
 type NavItem = {
   name: string;
@@ -37,6 +39,8 @@ type NavItem = {
   path?: string;
   /** External URL (e.g. Loyalty Dashboard). When set, opens in new tab and passes JWT in hash for SSO. */
   externalUrl?: string;
+  /** If true, navigation is blocked when user has no business profile; they are prompted and sent to dashboard. */
+  requireProfile?: boolean;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
@@ -65,11 +69,13 @@ const navItems: NavItem[] = [
     icon: <List />,
     name: "Products",
     path: "/product-listing",
+    requireProfile: true,
   },
   {
     icon: <ListCheck />,
     name: "Order Management",
     path: "/order-management",
+    requireProfile: true,
   },
   ...(LOYALTY_DASHBOARD_URL
     ? [
@@ -77,6 +83,7 @@ const navItems: NavItem[] = [
           icon: <Gift />,
           name: "Loyalty Dashboard",
           externalUrl: LOYALTY_DASHBOARD_URL,
+          requireProfile: true,
         },
       ]
     : []),
@@ -134,9 +141,27 @@ const othersItems: NavItem[] = [
 ];
 
 const AppSidebar: React.FC = () => {
+  const navigate = useNavigate();
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
   const token = useSelector((state: any) => state.auth?.token);
+  const businessId = useSelector((state: any) => state.auth?.user?._id);
+  const activeProfileId = useSelector(
+    (state: any) => state.auth?.user?.activeProfile
+  );
+
+  const { data: profilesData } = useGetBusinessProfilesQuery(
+    { businessId: businessId!, page: 1, limit: 1 },
+    { skip: !businessId }
+  );
+  const hasBusinessProfile =
+    (profilesData?.data?.docs?.length ?? 0) > 0;
+
+  const handleRequireProfileClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    WarningPopup("Please create a business profile first.");
+    navigate("/");
+  };
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
@@ -244,24 +269,55 @@ const AppSidebar: React.FC = () => {
               )}
             </button>
           ) : nav.externalUrl ? (
-            <a
-              href={
-                nav.externalUrl +
-                (token ? `#token=${encodeURIComponent(token)}` : "")
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              className="menu-item group menu-item-inactive"
-            >
-              <span className="menu-item-icon-size menu-item-icon-inactive">
-                {nav.icon}
-              </span>
-              {(isExpanded || isHovered || isMobileOpen) && (
-                <span className="menu-item-text">{nav.name}</span>
-              )}
-            </a>
+            nav.requireProfile && !hasBusinessProfile ? (
+              <button
+                type="button"
+                onClick={handleRequireProfileClick}
+                className="menu-item group menu-item-inactive w-full text-left"
+              >
+                <span className="menu-item-icon-size menu-item-icon-inactive">
+                  {nav.icon}
+                </span>
+                {(isExpanded || isHovered || isMobileOpen) && (
+                  <span className="menu-item-text">{nav.name}</span>
+                )}
+              </button>
+            ) : (
+              <a
+                href={
+                  nav.externalUrl +
+                  (token
+                    ? `#token=${encodeURIComponent(token)}${activeProfileId ? `&activeProfile=${encodeURIComponent(activeProfileId)}` : ""}`
+                    : "")
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="menu-item group menu-item-inactive"
+              >
+                <span className="menu-item-icon-size menu-item-icon-inactive">
+                  {nav.icon}
+                </span>
+                {(isExpanded || isHovered || isMobileOpen) && (
+                  <span className="menu-item-text">{nav.name}</span>
+                )}
+              </a>
+            )
           ) : (
-            nav.path && (
+            nav.path &&
+            (nav.requireProfile && !hasBusinessProfile ? (
+              <button
+                type="button"
+                onClick={handleRequireProfileClick}
+                className="menu-item group menu-item-inactive w-full text-left"
+              >
+                <span className="menu-item-icon-size menu-item-icon-inactive">
+                  {nav.icon}
+                </span>
+                {(isExpanded || isHovered || isMobileOpen) && (
+                  <span className="menu-item-text">{nav.name}</span>
+                )}
+              </button>
+            ) : (
               <Link
                 to={nav.path}
                 className={`menu-item group ${
@@ -281,7 +337,7 @@ const AppSidebar: React.FC = () => {
                   <span className="menu-item-text">{nav.name}</span>
                 )}
               </Link>
-            )
+            ))
           )}
           {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
             <div

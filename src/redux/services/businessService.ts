@@ -26,7 +26,19 @@ export const businessService = createApi({
       providesTags: ["BusinessProfiles"],
       transformErrorResponse,
     }),
+    createProfile: builder.mutation<any, FormData>({
+      query: (formData) => ({
+        url: "/createProfile",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["BusinessProfiles"],
+      transformErrorResponse,
+    }),
   }),
 });
 
-export const { useGetBusinessProfilesQuery } = businessService;
+export const {
+  useGetBusinessProfilesQuery,
+  useCreateProfileMutation,
+} = businessService;
