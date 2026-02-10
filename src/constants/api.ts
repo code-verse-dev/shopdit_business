@@ -1,8 +1,8 @@
 const { hostname } = window.location;
 
 const servers = {
-  local: "http://localhost:3011",
-  customDev: "http://react.customdev.solutions:3011",
+  local: "https://localhost:3011",
+  customDev: "https://react.customdev.solutions:3011",
   live: "",
   dummy: "https://9d2f-204-157-158-10.ngrok-free.app",
 };
