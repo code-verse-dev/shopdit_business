@@ -25,9 +25,11 @@ import {
 import {
   // CircleArrowOutUpRight,
   // CircleStar,
+  Briefcase,
   Gift,
   List,
   ListCheck,
+  Ticket,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { LOYALTY_DASHBOARD_URL } from "../constants/api";
@@ -65,6 +67,17 @@ const navItems: NavItem[] = [
   //   name: "Customers",
   //   path: "/customer",
   // },
+  {
+    icon: <Briefcase />,
+    name: "Jobs",
+    path: "/jobs",
+  },
+  {
+    icon: <Ticket />,
+    name: "Coupons",
+    path: "/coupons",
+    requireProfile: true,
+  },
   {
     icon: <List />,
     name: "Products",
@@ -172,10 +185,15 @@ const AppSidebar: React.FC = () => {
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // const isActive = (path: string) => location.pathname === path;
+  // Match exact path, path/*, or known child routes that share the same parent nav item
   const isActive = useCallback(
-    (path: string) =>
-      location.pathname === path || location.pathname.startsWith(path + "/"),
+    (path: string) => {
+      const p = location.pathname;
+      if (p === path || p.startsWith(path + "/")) return true;
+      if (path === "/product-listing" && p === "/add-product") return true;
+      if (path === "/events" && p === "/add-event") return true;
+      return false;
+    },
     [location.pathname]
   );
 

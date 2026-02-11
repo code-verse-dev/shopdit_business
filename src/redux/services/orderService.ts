@@ -13,14 +13,23 @@ export const orderService = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Orders"],
+  tagTypes: ["Orders", "Order"],
   endpoints: (builder) => ({
-    getAllOrders: builder.query<any, { page: number; limit: number }>({
-      query: ({ page, limit }) => `/getAllOrders?page=${page}&limit=${limit}`,
+    getBusinessProfileOrders: builder.query<
+      any,
+      { businessProfileId: string; page: number; limit: number }
+    >({
+      query: ({ businessProfileId, page, limit }) =>
+        `/getBusinessProfileOrders?businessProfileId=${businessProfileId}&page=${page}&limit=${limit}`,
       providesTags: ["Orders"],
+      transformErrorResponse,
+    }),
+    getOrder: builder.query<any, string>({
+      query: (id) => `/getOrder/${id}`,
+      providesTags: (_result, _err, id) => [{ type: "Order", id }],
       transformErrorResponse,
     }),
   }),
 });
 
-export const { useGetAllOrdersQuery } = orderService;
+export const { useGetBusinessProfileOrdersQuery, useGetOrderQuery } = orderService;

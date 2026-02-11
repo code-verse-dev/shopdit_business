@@ -18,6 +18,9 @@ import { analyticsService } from "./services/dashboardAnalytics";
 import { planService } from "./services/planService";
 import { subscriptionService } from "./services/subscriptionService";
 import { businessTypeService } from "./services/businessTypeService";
+import { jobService } from "./services/jobService";
+import { applicationService } from "./services/applicationService";
+import { couponService } from "./services/couponService";
 
 const persistConfig = {
   key: "shopdit_business",
@@ -39,6 +42,9 @@ const rootReducer = combineReducers({
   [planService.reducerPath]: planService.reducer,
   [subscriptionService.reducerPath]: subscriptionService.reducer,
   [businessTypeService.reducerPath]: businessTypeService.reducer,
+  [jobService.reducerPath]: jobService.reducer,
+  [applicationService.reducerPath]: applicationService.reducer,
+  [couponService.reducerPath]: couponService.reducer,
   auth: authReducer,
 });
 
@@ -62,8 +68,11 @@ export const store = configureStore({
       analyticsService.middleware,
       planService.middleware,
       subscriptionService.middleware,
-      businessTypeService.middleware
-    ),
+      businessTypeService.middleware,
+      jobService.middleware,
+      applicationService.middleware,
+      couponService.middleware
+    ) as never,
 });
 
 setupListeners(store.dispatch);

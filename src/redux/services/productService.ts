@@ -13,7 +13,7 @@ export const productService = createApi({
       return headers;
     },
   }),
-  tagTypes: ["BusinessProducts"],
+  tagTypes: ["BusinessProducts", "Product"],
   refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     getBusinessProducts: builder.query<
@@ -25,7 +25,25 @@ export const productService = createApi({
       providesTags: ["BusinessProducts"],
       transformErrorResponse,
     }),
+    getProduct: builder.query<any, string>({
+      query: (id) => `/getProduct/${id}`,
+      providesTags: (_result, _err, id) => [{ type: "Product", id }],
+      transformErrorResponse,
+    }),
+    addProduct: builder.mutation<any, FormData>({
+      query: (formData) => ({
+        url: "/addProduct",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["BusinessProducts"],
+      transformErrorResponse,
+    }),
   }),
 });
 
-export const { useGetBusinessProductsQuery } = productService;
+export const {
+  useGetBusinessProductsQuery,
+  useGetProductQuery,
+  useAddProductMutation,
+} = productService;

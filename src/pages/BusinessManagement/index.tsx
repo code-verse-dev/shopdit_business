@@ -28,10 +28,11 @@ const UserManagement = () => {
 
   const { pageNumber, limit, totalDocs, handlePageChange, updateTotalDocs } =
     usePagination(10);
-  const { data, isLoading, isError, isFetching } = useGetBusinessProfilesQuery(
-    { businessId, page: pageNumber, limit },
-    { skip: !businessId }
-  );
+  const { data, isLoading, isError, isFetching, refetch: refetchProfiles } =
+    useGetBusinessProfilesQuery(
+      { businessId, page: pageNumber, limit },
+      { skip: !businessId }
+    );
   const [setActiveProfile] = useSetActiveProfileMutation();
   const [switchingProfileId, setSwitchingProfileId] = useState<string | null>(
     null
@@ -49,6 +50,7 @@ const UserManagement = () => {
     try {
       await setActiveProfile({ profileId }).unwrap();
       dispatch(setActiveProfileAction(profileId));
+      refetchProfiles();
       SuccessPopup("Active business profile updated.");
     } catch (err: any) {
       ErrorPopup(err?.data?.message || "Failed to switch profile.");
