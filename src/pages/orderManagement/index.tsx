@@ -6,7 +6,7 @@ import {
   TableRow,
 } from "../../components/ui/table";
 import Badge from "../../components/ui/badge/Badge";
-import { Button, Pagination } from "antd";
+import { Button, Pagination, Skeleton } from "antd";
 import { ShoppingCart, Eye } from "lucide-react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
@@ -60,9 +60,7 @@ const OrderManagement = () => {
     if (businessProfileId) refetch();
   }, [pageNumber, limit, businessProfileId, refetch]);
 
-  const docs = isFetching
-    ? []
-    : ordersData?.data?.docs ?? ordersData?.docs ?? [];
+  const docs = ordersData?.data?.docs ?? ordersData?.docs ?? [];
 
   return (
     <>
@@ -71,9 +69,9 @@ const OrderManagement = () => {
       </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-            <p className="text-gray-500 dark:text-gray-400">Loading orders...</p>
+        {isLoading || isFetching ? (
+          <div className="p-6 space-y-4">
+            <Skeleton active paragraph={{ rows: 6 }} />
           </div>
         ) : isError ? (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center">

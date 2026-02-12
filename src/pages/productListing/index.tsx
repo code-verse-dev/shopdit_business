@@ -5,7 +5,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { Pagination } from "antd";
+import { Pagination, Skeleton } from "antd";
 import { Package, Eye } from "lucide-react";
 import { useNavigate } from "react-router";
 import { ModuleRegistry } from "ag-grid-community";
@@ -31,16 +31,13 @@ const ProductListing = () => {
     limit,
   }, { skip: !businessProfileId });
 
-  const products = isFetching ? [] : data?.data?.docs || [];
+  const products = data?.data?.docs || [];
 
   useEffect(() => {
     if (data?.data?.totalDocs) {
       updateTotalDocs(data.data.totalDocs);
     }
   }, [data?.data?.totalDocs, updateTotalDocs]);
-
-  if (isLoading) return <p>Loading products...</p>;
-  if (isError) return <p>Failed to load products.</p>;
 
   return (
     <>
@@ -56,7 +53,15 @@ const ProductListing = () => {
       </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-        {products.length === 0 ? (
+        {isLoading || isFetching ? (
+          <div className="p-6 space-y-4">
+            <Skeleton active paragraph={{ rows: 6 }} />
+          </div>
+        ) : isError ? (
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+            <p className="text-red-500">Failed to load products.</p>
+          </div>
+        ) : products.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
             <Package className="h-14 w-14 text-gray-300 dark:text-gray-600 mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">

@@ -25,7 +25,20 @@ export const jobService = createApi({
       providesTags: (_result, _err, id) => [{ type: "Job", id }],
       transformErrorResponse,
     }),
+    createJob: builder.mutation<any, FormData>({
+      query: (formData) => ({
+        url: "/createJob",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["Jobs"],
+      transformErrorResponse,
+    }),
   }),
 });
 
-export const { useGetJobsByBusinessQuery, useGetJobQuery } = jobService;
+export const {
+  useGetJobsByBusinessQuery,
+  useGetJobQuery,
+  useCreateJobMutation,
+} = jobService;

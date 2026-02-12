@@ -192,6 +192,8 @@ const AppSidebar: React.FC = () => {
       if (p === path || p.startsWith(path + "/")) return true;
       if (path === "/product-listing" && p === "/add-product") return true;
       if (path === "/events" && p === "/add-event") return true;
+      if (path === "/jobs" && p === "/add-job") return true;
+      if (path === "/coupons" && p === "/add-coupon") return true;
       return false;
     },
     [location.pathname]

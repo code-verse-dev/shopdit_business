@@ -5,11 +5,27 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { Button } from "antd";
+import Badge from "../../components/ui/badge/Badge";
+import { Button, Skeleton } from "antd";
 import { Ticket, Eye } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useSelector } from "react-redux";
 import { useGetBusinessCouponsQuery } from "../../redux/services/couponService";
+
+const getCouponStatusColor = (
+  status: string
+): "success" | "warning" | "error" | "primary" | "info" | "light" | "dark" => {
+  switch (status?.toLowerCase()) {
+    case "active":
+      return "success";
+    case "inactive":
+      return "warning";
+    case "expired":
+      return "error";
+    default:
+      return "primary";
+  }
+};
 
 const Coupons = () => {
   const navigate = useNavigate();
@@ -25,30 +41,25 @@ const Coupons = () => {
   const coupons = data?.data?.docs ?? data?.data ?? data?.docs ?? data ?? [];
   const list = Array.isArray(coupons) ? coupons : [];
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-        <p className="text-gray-500 dark:text-gray-400">Loading coupons...</p>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-        <p className="text-red-500">Failed to load coupons.</p>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold py-2">Coupons</h1>
+        <Button className="web-btn" onClick={() => navigate("/add-coupon")}>
+          + Add Coupon
+        </Button>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-        {list.length === 0 ? (
+        {isLoading ? (
+          <div className="p-6 space-y-4">
+            <Skeleton active paragraph={{ rows: 6 }} />
+          </div>
+        ) : isError ? (
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+            <p className="text-red-500">Failed to load coupons.</p>
+          </div>
+        ) : list.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
             <Ticket className="h-14 w-14 text-gray-300 dark:text-gray-600 mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
@@ -122,12 +133,15 @@ const Coupons = () => {
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                 {list.map((coupon: any, index: number) => {
                   const locationAddress =
-                    typeof coupon.location === "object" && coupon.location?.address
+                    typeof coupon.location === "object" &&
+                    coupon.location?.address
                       ? coupon.location.address
                       : "—";
                   const redemption =
                     coupon.redemptionLimit != null
-                      ? `${coupon.redemptionCount ?? 0} / ${coupon.redemptionLimit}`
+                      ? `${coupon.redemptionCount ?? 0} / ${
+                          coupon.redemptionLimit
+                        }`
                       : "—";
                   return (
                     <TableRow key={coupon._id || index}>
@@ -151,7 +165,8 @@ const Coupons = () => {
                           ${Number(coupon.price ?? 0).toLocaleString()}
                         </span>
                         <span className="ml-1 font-medium">
-                          ${Number(coupon.discountedPrice ?? 0).toLocaleString()}
+                          $
+                          {Number(coupon.discountedPrice ?? 0).toLocaleString()}
                         </span>
                       </TableCell>
                       <TableCell className="px-4 py-3 text-gray-700 text-start">
@@ -170,8 +185,14 @@ const Coupons = () => {
                       <TableCell className="px-4 py-3 text-gray-700 text-start">
                         {redemption}
                       </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-700 text-start capitalize">
-                        {coupon.status ?? "—"}
+                      <TableCell className="px-4 py-3 text-gray-700 text-start">
+                        {coupon.status ? (
+                          <Badge color={getCouponStatusColor(coupon.status)}>
+                            {coupon.status}
+                          </Badge>
+                        ) : (
+                          "—"
+                        )}
                       </TableCell>
                       <TableCell className="px-4 py-3 text-gray-700 text-start">
                         <Button

@@ -48,8 +48,10 @@ import OrderManagement from "./pages/orderManagement";
 import OrderDetails from "./pages/orderManagement/orderDetails";
 import Jobs from "./pages/jobs";
 import JobDetails from "./pages/jobs/jobDetails";
+import AddJob from "./pages/jobs/addJob";
 import Coupons from "./pages/coupons";
 import CouponDetails from "./pages/coupons/couponDetails";
+import AddCoupon from "./pages/coupons/addCoupon";
 import AddReward from "./pages/rewards/addReward";
 import AddProduct from "./pages/productListing/addProduct";
 import AddCustomer from "./pages/customer/addCustomer";
@@ -212,6 +214,12 @@ const routesConfig: RouteConfig[] = [
     title: "Job Details",
   },
   {
+    path: "/add-job",
+    element: <AddJob />,
+
+    title: "Add Job",
+  },
+  {
     path: "/coupons",
     element: <Coupons />,
 
@@ -222,6 +230,12 @@ const routesConfig: RouteConfig[] = [
     element: <CouponDetails />,
 
     title: "Coupon Details",
+  },
+  {
+    path: "/add-coupon",
+    element: <AddCoupon />,
+
+    title: "Add Coupon",
   },
 ];
 

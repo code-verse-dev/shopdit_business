@@ -21,7 +21,16 @@ export const couponService = createApi({
       providesTags: ["Coupons"],
       transformErrorResponse,
     }),
+    addCoupon: builder.mutation<any, FormData>({
+      query: (formData) => ({
+        url: "/addCoupon",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["Coupons"],
+      transformErrorResponse,
+    }),
   }),
 });
 
-export const { useGetBusinessCouponsQuery } = couponService;
+export const { useGetBusinessCouponsQuery, useAddCouponMutation } = couponService;

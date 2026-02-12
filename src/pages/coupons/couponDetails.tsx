@@ -1,11 +1,27 @@
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { Button } from "antd";
-import { useNavigate, useParams, useLocation } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { UPLOADS_URL } from "../../constants/api";
+import Badge from "../../components/ui/badge/Badge";
+
+const getCouponStatusColor = (
+  status: string
+): "success" | "warning" | "error" | "primary" | "info" | "light" | "dark" => {
+  switch (status?.toLowerCase()) {
+    case "active":
+      return "success";
+    case "inactive":
+      return "warning";
+    case "expired":
+      return "error";
+    default:
+      return "primary";
+  }
+};
 
 const CouponDetails = () => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  // const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const coupon = location.state?.coupon as any;
 
@@ -59,13 +75,21 @@ const CouponDetails = () => {
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">
                 {coupon.couponName ?? "—"}
               </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 capitalize mb-4">
-                {coupon.status ?? "—"}
-              </p>
+              <div className="mb-4">
+                {coupon.status ? (
+                  <Badge color={getCouponStatusColor(coupon.status)}>
+                    {coupon.status}
+                  </Badge>
+                ) : (
+                  "—"
+                )}
+              </div>
               <dl className="grid gap-3 text-sm">
                 {coupon.description && (
                   <div>
-                    <dt className="text-gray-500 dark:text-gray-400">Description</dt>
+                    <dt className="text-gray-500 dark:text-gray-400">
+                      Description
+                    </dt>
                     <dd className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
                       {coupon.description}
                     </dd>
@@ -77,11 +101,15 @@ const CouponDetails = () => {
                     <span className="text-gray-500 line-through mr-2">
                       ${Number(coupon.price ?? 0).toLocaleString()}
                     </span>
-                    <span>${Number(coupon.discountedPrice ?? 0).toLocaleString()}</span>
+                    <span>
+                      ${Number(coupon.discountedPrice ?? 0).toLocaleString()}
+                    </span>
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-gray-500 dark:text-gray-400">Start date</dt>
+                  <dt className="text-gray-500 dark:text-gray-400">
+                    Start date
+                  </dt>
                   <dd className="font-medium text-gray-900 dark:text-white">
                     {coupon.startDate
                       ? new Date(coupon.startDate).toLocaleDateString()
@@ -103,10 +131,14 @@ const CouponDetails = () => {
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-gray-500 dark:text-gray-400">Redemptions</dt>
+                  <dt className="text-gray-500 dark:text-gray-400">
+                    Redemptions
+                  </dt>
                   <dd className="font-medium text-gray-900 dark:text-white">
                     {coupon.redemptionLimit != null
-                      ? `${coupon.redemptionCount ?? 0} / ${coupon.redemptionLimit}`
+                      ? `${coupon.redemptionCount ?? 0} / ${
+                          coupon.redemptionLimit
+                        }`
                       : "—"}
                   </dd>
                 </div>
