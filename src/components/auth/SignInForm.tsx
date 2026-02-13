@@ -8,7 +8,8 @@ import Cookies from "js-cookie";
 import Button from "../ui/button/Button";
 import { useLoginMutation } from "../../redux/services/authSlice";
 import { useAppDispatch } from "../../redux/hooks";
-import { setCredentials } from "../../redux/slices/authSlice";
+import { authSlice } from "../../redux/slices/authSlice";
+import type { AnyAction } from "@reduxjs/toolkit";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,7 +18,7 @@ export default function SignInForm() {
 
   // ✅ added
   const [login] = useLoginMutation();
-  const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch() as (action: AnyAction) => void;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -32,7 +33,7 @@ export default function SignInForm() {
       Cookies.set("jwt", res.token, { expires: 7 });
 
       dispatch(
-        setCredentials({
+        authSlice.actions.setCredentials({
           user: res.business,
           token: res.token,
           businessProfiles: res.businessProfiles ?? [],
