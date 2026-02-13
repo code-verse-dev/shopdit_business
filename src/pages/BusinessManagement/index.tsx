@@ -5,7 +5,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { Pagination } from "antd";
+import { Pagination, Skeleton } from "antd";
 import { Building2, Check, Eye, RefreshCw } from "lucide-react";
 import { ModuleRegistry } from "ag-grid-community";
 import { AllEnterpriseModule } from "ag-grid-enterprise";
@@ -28,10 +28,11 @@ const UserManagement = () => {
 
   const { pageNumber, limit, totalDocs, handlePageChange, updateTotalDocs } =
     usePagination(10);
-  const { data, isLoading, isError, isFetching } = useGetBusinessProfilesQuery(
-    { businessId, page: pageNumber, limit },
-    { skip: !businessId }
-  );
+  const { data, isLoading, isError, isFetching, refetch: refetchProfiles } =
+    useGetBusinessProfilesQuery(
+      { businessId, page: pageNumber, limit },
+      { skip: !businessId }
+    );
   const [setActiveProfile] = useSetActiveProfileMutation();
   const [switchingProfileId, setSwitchingProfileId] = useState<string | null>(
     null
@@ -49,6 +50,7 @@ const UserManagement = () => {
     try {
       await setActiveProfile({ profileId }).unwrap();
       dispatch(setActiveProfileAction(profileId));
+      refetchProfiles();
       SuccessPopup("Active business profile updated.");
     } catch (err: any) {
       ErrorPopup(err?.data?.message || "Failed to switch profile.");
@@ -57,9 +59,7 @@ const UserManagement = () => {
     }
   };
 
-  if (isLoading) return <>Loading...</>;
-  if (isError) return <>Failed to load profiles.</>;
-  const profiles = isFetching ? [] : data?.data?.docs || [];
+  const profiles = data?.data?.docs || [];
 
   const activeProfileIdFromResponse = profiles[0]?.business?.activeProfile;
   const activeProfileId =
@@ -78,7 +78,15 @@ const UserManagement = () => {
         </button>
       </div>
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-        {profiles.length === 0 ? (
+        {isLoading || isFetching ? (
+          <div className="p-6 space-y-4">
+            <Skeleton active paragraph={{ rows: 6 }} />
+          </div>
+        ) : isError ? (
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+            <p className="text-red-500">Failed to load profiles.</p>
+          </div>
+        ) : profiles.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
             <Building2 className="h-14 w-14 text-gray-300 dark:text-gray-600 mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">

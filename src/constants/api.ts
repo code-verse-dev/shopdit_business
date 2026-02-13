@@ -1,7 +1,7 @@
 const { hostname } = window.location;
 
 const servers = {
-  local: "https://localhost:3011",
+  local: "http://localhost:3011",
   customDev: "https://react.customdev.solutions:3011",
   live: "",
   dummy: "https://9d2f-204-157-158-10.ngrok-free.app",
@@ -41,5 +41,5 @@ export const LOYALTY_DASHBOARD_URL =
   typeof import.meta.env?.VITE_LOYALTY_DASHBOARD_URL === "string"
     ? import.meta.env.VITE_LOYALTY_DASHBOARD_URL.replace(/\/$/, "")
     : hostname.includes("localhost")
-      ? "http://localhost:3000"
-      : "https://react.customdev.solutions/shopdit/loyalty-dash/";
+    ? "http://localhost:3000"
+    : "https://react.customdev.solutions/shopdit/loyalty-dash/";

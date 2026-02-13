@@ -6,11 +6,13 @@ import {
   TableRow,
 } from "../../components/ui/table";
 import Badge from "../../components/ui/badge/Badge";
-import { ShoppingCart } from "lucide-react";
-// import { Pagination } from "antd";
-// import { useEffect } from "react";
-// import { useGetAllOrdersQuery } from "../../redux/services/orderService";
-// import usePagination from "../../utils/usePagination";
+import { Button, Pagination, Skeleton } from "antd";
+import { ShoppingCart, Eye } from "lucide-react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
+import { useSelector } from "react-redux";
+import { useGetBusinessProfileOrdersQuery } from "../../redux/services/orderService";
+import usePagination from "../../utils/usePagination";
 
 const getStatusColor = (
   status: string
@@ -30,29 +32,35 @@ const getStatusColor = (
 };
 
 const OrderManagement = () => {
-  // TODO: wire the right orders API later
-  // const { pageNumber, limit, totalDocs, handlePageChange, updateTotalDocs } =
-  //   usePagination(10);
-  // const {
-  //   data: orders,
-  //   isLoading,
-  // isFetching,
-  //   isError,
-  //   refetch,
-  // } = useGetAllOrdersQuery({
-  //   page: pageNumber,
-  //   limit,
-  // });
-  // useEffect(() => {
-  //   if (orders?.data?.totalDocs) {
-  //     updateTotalDocs(orders.data.totalDocs);
-  //   }
-  // }, [orders, updateTotalDocs]);
-  // useEffect(() => {
-  //   refetch();
-  // }, [pageNumber, limit, refetch]);
+  const navigate = useNavigate();
+  const { user } = useSelector((state: any) => state.auth);
+  const businessProfileId =
+    user?.activeProfile ?? user?.businessProfiles?.[0]?._id;
+  const { pageNumber, limit, totalDocs, handlePageChange, updateTotalDocs } =
+    usePagination(10);
 
-  const docs: any[] = [];
+  const {
+    data: ordersData,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useGetBusinessProfileOrdersQuery(
+    { businessProfileId: businessProfileId!, page: pageNumber, limit },
+    { skip: !businessProfileId }
+  );
+
+  useEffect(() => {
+    if (ordersData?.data?.totalDocs != null) {
+      updateTotalDocs(ordersData.data.totalDocs);
+    }
+  }, [ordersData?.data?.totalDocs, updateTotalDocs]);
+
+  useEffect(() => {
+    if (businessProfileId) refetch();
+  }, [pageNumber, limit, businessProfileId, refetch]);
+
+  const docs = ordersData?.data?.docs ?? ordersData?.docs ?? [];
 
   return (
     <>
@@ -61,7 +69,15 @@ const OrderManagement = () => {
       </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-        {docs.length === 0 ? (
+        {isLoading || isFetching ? (
+          <div className="p-6 space-y-4">
+            <Skeleton active paragraph={{ rows: 6 }} />
+          </div>
+        ) : isError ? (
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+            <p className="text-red-500">Failed to load orders.</p>
+          </div>
+        ) : docs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
             <ShoppingCart className="h-14 w-14 text-gray-300 dark:text-gray-600 mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
@@ -119,6 +135,12 @@ const OrderManagement = () => {
                     >
                       Status
                     </TableCell>
+                    <TableCell
+                      isHeader
+                      className="px-5 py-3 text-start text-gray-500"
+                    >
+                      Actions
+                    </TableCell>
                   </TableRow>
                 </TableHeader>
 
@@ -126,27 +148,43 @@ const OrderManagement = () => {
                   {docs.map((order: any, index: number) => (
                     <TableRow key={order._id || index}>
                       <TableCell className="px-5 py-4 text-start">
-                        #{index + 1}
+                        #{(pageNumber - 1) * limit + index + 1}
                       </TableCell>
                       <TableCell className="px-4 py-3 text-gray-700 text-start">
-                        {order?.personName || "N/A"}
+                        {order?.personName ?? order?.user?.fullName ?? "N/A"}
                       </TableCell>
                       <TableCell className="px-4 py-3 text-gray-700 text-start">
-                        {new Date(order?.createdAt).toLocaleDateString() || "-"}
+                        {order?.createdAt
+                          ? new Date(order.createdAt).toLocaleDateString()
+                          : "-"}
                       </TableCell>
                       <TableCell className="px-4 py-3 text-gray-700 text-start">
-                        ${order?.subTotal || "-"}
+                        ${order?.subTotal ?? "-"}
                       </TableCell>
                       <TableCell className="px-4 py-3 text-gray-700 text-start">
-                        {order?.user?.email || "-"}
+                        {order?.user?.email ?? "-"}
                       </TableCell>
                       <TableCell className="px-4 py-3 text-start">
-                        {order?.products?.length || 0}
+                        {order?.products?.length ?? 0}
                       </TableCell>
                       <TableCell className="px-4 py-3 text-center">
-                        <Badge size="sm" color={getStatusColor(order.status)}>
-                          {order?.status || "Unknown"}
+                        <Badge size="sm" color={getStatusColor(order?.status)}>
+                          {order?.status ?? "Unknown"}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-start">
+                        <Button
+                          type="text"
+                          onClick={() =>
+                            navigate(`/order-management/${order._id}`, {
+                              state: { order },
+                            })
+                          }
+                          className="text-primary-500 hover:text-primary-600 !p-0 inline-flex items-center justify-center"
+                          title="View details"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -154,7 +192,7 @@ const OrderManagement = () => {
               </Table>
             </div>
 
-            {/* <div className="p-4">
+            <div className="p-4">
               <Pagination
                 align="end"
                 current={pageNumber}
@@ -162,7 +200,7 @@ const OrderManagement = () => {
                 pageSize={limit}
                 onChange={handlePageChange}
               />
-            </div> */}
+            </div>
           </>
         )}
       </div>

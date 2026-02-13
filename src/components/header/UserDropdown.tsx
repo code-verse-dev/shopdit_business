@@ -5,9 +5,11 @@ import { Link } from "react-router";
 import Cookies from "js-cookie";
 import { UPLOADS_URL } from "../../constants/api";
 import UserAvatar from "../UserProfile/UserAvatar";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../redux/slices/authSlice";
 
 export default function UserDropdown() {
+  const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.auth);
   const [isOpen, setIsOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -21,6 +23,7 @@ export default function UserDropdown() {
   }
 
   function clickSignOut() {
+    dispatch(logout());
     Cookies.remove("jwt");
   }
   return (

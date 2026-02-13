@@ -13,7 +13,7 @@ export const eventService = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Events"],
+  tagTypes: ["Events", "Event"],
   endpoints: (builder) => ({
     getBusinessEvents: builder.query<
       any,
@@ -24,7 +24,25 @@ export const eventService = createApi({
       providesTags: ["Events"],
       transformErrorResponse,
     }),
+    getEvent: builder.query<any, string>({
+      query: (id) => `/getEvent/${id}`,
+      providesTags: (_result, _err, id) => [{ type: "Event", id }],
+      transformErrorResponse,
+    }),
+    addEvent: builder.mutation<any, FormData>({
+      query: (formData) => ({
+        url: "/addEvent",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["Events"],
+      transformErrorResponse,
+    }),
   }),
 });
 
-export const { useGetBusinessEventsQuery } = eventService;
+export const {
+  useGetBusinessEventsQuery,
+  useGetEventQuery,
+  useAddEventMutation,
+} = eventService;

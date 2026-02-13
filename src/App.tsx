@@ -35,14 +35,23 @@ import BusinessDetails from "./pages/BusinessManagement/businessDetails";
 import CreateBusinessProfile from "./pages/BusinessManagement/createBusinessProfile";
 
 import Events from "./pages/events";
+import AddEvent from "./pages/events/addEvent";
+import EventDetails from "./pages/events/eventDetails";
 
 import MyCollaboration from "./pages/myCollaboration";
 import CampaignAnalytics from "./pages/campaignAnalytics/indesx";
 import Rewards from "./pages/rewards";
 import Customer from "./pages/customer";
 import ProductListing from "./pages/productListing";
+import ProductDetails from "./pages/productListing/productDetails";
 import OrderManagement from "./pages/orderManagement";
 import OrderDetails from "./pages/orderManagement/orderDetails";
+import Jobs from "./pages/jobs";
+import JobDetails from "./pages/jobs/jobDetails";
+import AddJob from "./pages/jobs/addJob";
+import Coupons from "./pages/coupons";
+import CouponDetails from "./pages/coupons/couponDetails";
+import AddCoupon from "./pages/coupons/addCoupon";
 import AddReward from "./pages/rewards/addReward";
 import AddProduct from "./pages/productListing/addProduct";
 import AddCustomer from "./pages/customer/addCustomer";
@@ -91,7 +100,19 @@ const routesConfig: RouteConfig[] = [
     path: "/events",
     element: <Events />,
 
-    title: "Events And Add Event",
+    title: "Events",
+  },
+  {
+    path: "/add-event",
+    element: <AddEvent />,
+
+    title: "Add Event",
+  },
+  {
+    path: "/events/:id",
+    element: <EventDetails />,
+
+    title: "Event Details",
   },
   {
     path: "/my-collaboration",
@@ -156,6 +177,12 @@ const routesConfig: RouteConfig[] = [
     title: "Product Listing",
   },
   {
+    path: "/product-listing/:id",
+    element: <ProductDetails />,
+
+    title: "Product Details",
+  },
+  {
     path: "/add-product",
     element: <AddProduct />,
 
@@ -173,6 +200,42 @@ const routesConfig: RouteConfig[] = [
     element: <OrderDetails />,
 
     title: "Campaign Management",
+  },
+  {
+    path: "/jobs",
+    element: <Jobs />,
+
+    title: "Jobs",
+  },
+  {
+    path: "/jobs/:id",
+    element: <JobDetails />,
+
+    title: "Job Details",
+  },
+  {
+    path: "/add-job",
+    element: <AddJob />,
+
+    title: "Add Job",
+  },
+  {
+    path: "/coupons",
+    element: <Coupons />,
+
+    title: "Coupons",
+  },
+  {
+    path: "/coupons/:id",
+    element: <CouponDetails />,
+
+    title: "Coupon Details",
+  },
+  {
+    path: "/add-coupon",
+    element: <AddCoupon />,
+
+    title: "Add Coupon",
   },
 ];
 

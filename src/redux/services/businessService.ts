@@ -13,7 +13,7 @@ export const businessService = createApi({
       return headers;
     },
   }),
-  tagTypes: ["BusinessProfiles"],
+  tagTypes: ["BusinessProfiles", "PointsStats"],
   refetchOnMountOrArgChange: true,
 
   endpoints: (builder) => ({
@@ -24,6 +24,26 @@ export const businessService = createApi({
       query: ({ businessId, page, limit }) =>
         `/${businessId}/profiles?page=${page}&limit=${limit}`,
       providesTags: ["BusinessProfiles"],
+      transformErrorResponse,
+    }),
+    getPointsStats: builder.query<
+      any,
+      {
+        businessProfileId?: string;
+        from?: string;
+        to?: string;
+      }
+    >({
+      query: (params) => {
+        const search = new URLSearchParams();
+        if (params.businessProfileId)
+          search.set("businessProfileId", params.businessProfileId);
+        if (params.from) search.set("from", params.from);
+        if (params.to) search.set("to", params.to);
+        const q = search.toString();
+        return `/getPointsStats${q ? `?${q}` : ""}`;
+      },
+      providesTags: ["PointsStats"],
       transformErrorResponse,
     }),
     createProfile: builder.mutation<any, FormData>({
@@ -40,5 +60,6 @@ export const businessService = createApi({
 
 export const {
   useGetBusinessProfilesQuery,
+  useGetPointsStatsQuery,
   useCreateProfileMutation,
 } = businessService;

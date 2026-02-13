@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
+import { message } from "antd";
 import { ImageUrl } from "../utils/Functions";
 import { WarningPopup } from "../components/popup/Popup";
 // Assume these icons are imported from an icon library
@@ -25,9 +26,12 @@ import {
 import {
   // CircleArrowOutUpRight,
   // CircleStar,
+  Briefcase,
   Gift,
+  Loader2,
   List,
   ListCheck,
+  Ticket,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { LOYALTY_DASHBOARD_URL } from "../constants/api";
@@ -65,6 +69,17 @@ const navItems: NavItem[] = [
   //   name: "Customers",
   //   path: "/customer",
   // },
+  {
+    icon: <Briefcase />,
+    name: "Jobs",
+    path: "/jobs",
+  },
+  {
+    icon: <Ticket />,
+    name: "Coupons",
+    path: "/coupons",
+    requireProfile: true,
+  },
   {
     icon: <List />,
     name: "Products",
@@ -163,6 +178,32 @@ const AppSidebar: React.FC = () => {
     navigate("/");
   };
 
+  const [openingExternalUrl, setOpeningExternalUrl] = useState<string | null>(
+    null
+  );
+  const handleOpenExternalUrl = useCallback(
+    (externalUrl: string) => {
+      const url =
+        externalUrl +
+        (token
+          ? `#token=${encodeURIComponent(token)}${activeProfileId ? `&activeProfile=${encodeURIComponent(activeProfileId)}` : ""}`
+          : "");
+      setOpeningExternalUrl(externalUrl);
+      message.loading({
+        content: "Opening Loyalty Dashboard…",
+        key: "loyalty-open",
+        duration: 0,
+      });
+      setTimeout(() => {
+        window.open(url, "_blank", "noopener,noreferrer");
+        setOpeningExternalUrl(null);
+        message.destroy("loyalty-open");
+        message.success("Loyalty Dashboard opened in a new tab", 2);
+      }, 500);
+    },
+    [token, activeProfileId]
+  );
+
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
     index: number;
@@ -172,10 +213,17 @@ const AppSidebar: React.FC = () => {
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // const isActive = (path: string) => location.pathname === path;
+  // Match exact path, path/*, or known child routes that share the same parent nav item
   const isActive = useCallback(
-    (path: string) =>
-      location.pathname === path || location.pathname.startsWith(path + "/"),
+    (path: string) => {
+      const p = location.pathname;
+      if (p === path || p.startsWith(path + "/")) return true;
+      if (path === "/product-listing" && p === "/add-product") return true;
+      if (path === "/events" && p === "/add-event") return true;
+      if (path === "/jobs" && p === "/add-job") return true;
+      if (path === "/coupons" && p === "/add-coupon") return true;
+      return false;
+    },
     [location.pathname]
   );
 
@@ -283,24 +331,29 @@ const AppSidebar: React.FC = () => {
                 )}
               </button>
             ) : (
-              <a
-                href={
-                  nav.externalUrl +
-                  (token
-                    ? `#token=${encodeURIComponent(token)}${activeProfileId ? `&activeProfile=${encodeURIComponent(activeProfileId)}` : ""}`
-                    : "")
+              <button
+                type="button"
+                onClick={() =>
+                  nav.externalUrl && handleOpenExternalUrl(nav.externalUrl)
                 }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="menu-item group menu-item-inactive"
+                disabled={openingExternalUrl === nav.externalUrl}
+                className="menu-item group menu-item-inactive w-full text-left cursor-pointer disabled:opacity-70 disabled:cursor-wait"
               >
-                <span className="menu-item-icon-size menu-item-icon-inactive">
-                  {nav.icon}
+                <span className="menu-item-icon-size menu-item-icon-inactive flex-shrink-0">
+                  {openingExternalUrl === nav.externalUrl ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-brand-500" />
+                  ) : (
+                    nav.icon
+                  )}
                 </span>
                 {(isExpanded || isHovered || isMobileOpen) && (
-                  <span className="menu-item-text">{nav.name}</span>
+                  <span className="menu-item-text">
+                    {openingExternalUrl === nav.externalUrl
+                      ? "Opening…"
+                      : nav.name}
+                  </span>
                 )}
-              </a>
+              </button>
             )
           ) : (
             nav.path &&
