@@ -8,13 +8,13 @@ import {
   TableRow,
 } from "../../components/ui/table";
 import Badge from "../../components/ui/badge/Badge";
-import { Pencil, Layers, Trash2, Upload, ArrowDownToLine } from "lucide-react";
+import { Pencil, Layers, Upload, ArrowDownToLine } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
 import {
   useGetFlyerQuery,
   usePublishFlyerMutation,
   useUnpublishFlyerMutation,
-  useDeleteFlyerMutation,
+  // useDeleteFlyerMutation, // commented out with Delete button
 } from "../../redux/services/flyersService";
 import { SuccessPopup, ErrorPopup } from "../../components/popup/Popup";
 import { UPLOADS_URL } from "../../constants/api";
@@ -125,7 +125,7 @@ export default function FlyerDetails() {
   const { data: flyerData, isLoading, isError, refetch } = useGetFlyerQuery(id!, { skip: !id });
   const [publishFlyer, { isLoading: publishing }] = usePublishFlyerMutation();
   const [unpublishFlyer, { isLoading: unpublishing }] = useUnpublishFlyerMutation();
-  const [deleteFlyer, { isLoading: deleting }] = useDeleteFlyerMutation();
+  // const [deleteFlyer, { isLoading: deleting }] = useDeleteFlyerMutation();
 
   const flyer = flyerData?.data ?? flyerData;
   const template = flyer?.flyer_template_id ?? flyer?.template ?? flyer?.layout ?? {};
@@ -182,24 +182,24 @@ export default function FlyerDetails() {
     }
   };
 
-  const handleDelete = () => {
-    Modal.confirm({
-      title: "Delete flyer?",
-      content: "This flyer will be permanently deleted.",
-      okText: "Delete",
-      okType: "danger",
-      cancelText: "Cancel",
-      onOk: async () => {
-        try {
-          await deleteFlyer(id!).unwrap();
-          SuccessPopup("Flyer deleted.");
-          navigate("/flyers");
-        } catch (e: any) {
-          ErrorPopup(e?.data?.message ?? "Failed to delete.");
-        }
-      },
-    });
-  };
+  // const handleDelete = () => {
+  //   Modal.confirm({
+  //     title: "Delete flyer?",
+  //     content: "This flyer will be permanently deleted.",
+  //     okText: "Delete",
+  //     okType: "danger",
+  //     cancelText: "Cancel",
+  //     onOk: async () => {
+  //       try {
+  //         await deleteFlyer(id!).unwrap();
+  //         SuccessPopup("Flyer deleted.");
+  //         navigate("/flyers");
+  //       } catch (e: any) {
+  //         ErrorPopup(e?.data?.message ?? "Failed to delete.");
+  //       }
+  //     },
+  //   });
+  // };
 
   const isProductSlot = (s: any) => (s.slot_type ?? s.slotType ?? "").toLowerCase() === "product";
   const isBannerOrHero = (s: any) => {
