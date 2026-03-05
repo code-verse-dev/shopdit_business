@@ -52,8 +52,14 @@ import AddJob from "./pages/jobs/addJob";
 import Coupons from "./pages/coupons";
 import CouponDetails from "./pages/coupons/couponDetails";
 import AddCoupon from "./pages/coupons/addCoupon";
+import Flyers from "./pages/flyers";
+import FlyerDetails from "./pages/flyers/flyerDetails";
+import FlyerEdit from "./pages/flyers/flyerEdit";
+import CreateFlyer from "./pages/flyers/createFlyer";
+import FlyerBuilder from "./pages/flyers/flyerBuilder";
 import AddReward from "./pages/rewards/addReward";
 import AddProduct from "./pages/productListing/addProduct";
+import EditProduct from "./pages/productListing/editProduct";
 import AddCustomer from "./pages/customer/addCustomer";
 import ProtectedRoute from "./routes/auth-route";
 
@@ -183,6 +189,12 @@ const routesConfig: RouteConfig[] = [
     title: "Product Details",
   },
   {
+    path: "/product-listing/:id/edit",
+    element: <EditProduct />,
+
+    title: "Edit Product",
+  },
+  {
     path: "/add-product",
     element: <AddProduct />,
 
@@ -236,6 +248,36 @@ const routesConfig: RouteConfig[] = [
     element: <AddCoupon />,
 
     title: "Add Coupon",
+  },
+  {
+    path: "/flyers",
+    element: <Flyers />,
+
+    title: "Flyers",
+  },
+  {
+    path: "/flyers/create",
+    element: <CreateFlyer />,
+
+    title: "Create Flyer",
+  },
+  {
+    path: "/flyers/:id/edit",
+    element: <FlyerEdit />,
+
+    title: "Edit Flyer",
+  },
+  {
+    path: "/flyers/:id/build",
+    element: <FlyerBuilder />,
+
+    title: "Flyer Builder",
+  },
+  {
+    path: "/flyers/:id",
+    element: <FlyerDetails />,
+
+    title: "Flyer Details",
   },
 ];
 

@@ -21,6 +21,7 @@ import { businessTypeService } from "./services/businessTypeService";
 import { jobService } from "./services/jobService";
 import { applicationService } from "./services/applicationService";
 import { couponService } from "./services/couponService";
+import { flyersService } from "./services/flyersService";
 
 const persistConfig = {
   key: "shopdit_business",
@@ -45,6 +46,7 @@ const rootReducer = combineReducers({
   [jobService.reducerPath]: jobService.reducer,
   [applicationService.reducerPath]: applicationService.reducer,
   [couponService.reducerPath]: couponService.reducer,
+  [flyersService.reducerPath]: flyersService.reducer,
   auth: authReducer,
 });
 
@@ -71,7 +73,8 @@ export const store = configureStore({
       businessTypeService.middleware,
       jobService.middleware,
       applicationService.middleware,
-      couponService.middleware
+      couponService.middleware,
+      flyersService.middleware
     ) as never,
 });
 
