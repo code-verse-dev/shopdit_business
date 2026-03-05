@@ -1,12 +1,12 @@
 import Badge from "../../components/ui/badge/Badge";
-import { Button, Input, Pagination, Select, Skeleton, Modal } from "antd";
-import { Layers, Pencil, Trash2, Upload, ArrowDownToLine } from "lucide-react";
+import { Button, Input, Pagination, Select, Skeleton } from "antd";
+import { Layers, Pencil, Upload, ArrowDownToLine } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useSelector } from "react-redux";
 import { useCallback, useEffect, useState } from "react";
 import {
   useGetFlyersQuery,
-  useDeleteFlyerMutation,
+  // useDeleteFlyerMutation,
   usePublishFlyerMutation,
   useUnpublishFlyerMutation,
 } from "../../redux/services/flyersService";
@@ -69,7 +69,7 @@ export default function Flyers() {
     { skip: !businessProfileId }
   );
 
-  const [deleteFlyer, { isLoading: isDeleting }] = useDeleteFlyerMutation();
+  // const [deleteFlyer] = useDeleteFlyerMutation();
   const [publishFlyer, { isLoading: isPublishing }] = usePublishFlyerMutation();
   const [unpublishFlyer, { isLoading: isUnpublishing }] =
     useUnpublishFlyerMutation();
@@ -100,38 +100,38 @@ export default function Flyers() {
   const expiredCount =
     stats?.expired ?? stats?.expiredCount ?? res.expired ?? res.expiredCount ?? getCountFromArray("expired") ?? 0;
 
-  const handleDelete = useCallback(
-    (flyer: any) => {
-      const rawId = flyer._id ?? flyer.id;
-      const flyerId =
-        rawId == null
-          ? null
-          : typeof rawId === "string"
-          ? rawId
-          : String((rawId as any)?.toString?.() ?? rawId);
-      if (!flyerId || flyerId === "[object Object]") return;
-      Modal.confirm({
-        title: "Delete flyer?",
-        content: `"${
-          flyer.title ?? flyer.name ?? "This flyer"
-        }" will be permanently deleted. Only draft flyers can be deleted.`,
-        okText: "Delete",
-        okType: "danger",
-        cancelText: "Cancel",
-        onOk: async () => {
-          try {
-            await deleteFlyer(flyerId).unwrap();
-            SuccessPopup("Flyer deleted.");
-            refetch();
-          } catch (e: any) {
-            ErrorPopup(e?.data?.message ?? "Failed to delete flyer.");
-            throw e;
-          }
-        },
-      });
-    },
-    [deleteFlyer, refetch]
-  );
+  // const handleDelete = useCallback(
+  //   (flyer: any) => {
+  //     const rawId = flyer._id ?? flyer.id;
+  //     const flyerId =
+  //       rawId == null
+  //         ? null
+  //         : typeof rawId === "string"
+  //         ? rawId
+  //         : String((rawId as any)?.toString?.() ?? rawId);
+  //     if (!flyerId || flyerId === "[object Object]") return;
+  //     Modal.confirm({
+  //       title: "Delete flyer?",
+  //       content: `"${
+  //         flyer.title ?? flyer.name ?? "This flyer"
+  //       }" will be permanently deleted. Only draft flyers can be deleted.`,
+  //       okText: "Delete",
+  //       okType: "danger",
+  //       cancelText: "Cancel",
+  //       onOk: async () => {
+  //         try {
+  //           await deleteFlyer(flyerId).unwrap();
+  //           SuccessPopup("Flyer deleted.");
+  //           refetch();
+  //         } catch (e: any) {
+  //           ErrorPopup(e?.data?.message ?? "Failed to delete flyer.");
+  //           throw e;
+  //         }
+  //       },
+  //     });
+  //   },
+  //   [deleteFlyer, refetch]
+  // );
 
   const handlePublish = useCallback(
     async (_e: React.MouseEvent | null, flyer: any) => {
@@ -260,7 +260,7 @@ export default function Flyers() {
             <div className="p-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {list.map((flyer: any) => {
                 const status = flyer.status ?? flyer.state ?? "draft";
-                const isDraft = String(status).toLowerCase() === "draft";
+                // const isDraft = String(status).toLowerCase() === "draft";
                 const isPublished =
                   String(status).toLowerCase() === "published";
                 return (
