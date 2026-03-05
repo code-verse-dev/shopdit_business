@@ -1,5 +1,5 @@
 import { ArrowLeftOutlined } from "@ant-design/icons";
-import { Button, Modal, Progress, Skeleton } from "antd";
+import { Button, Progress, Skeleton } from "antd";
 import {
   Table,
   TableBody,
@@ -146,7 +146,7 @@ export default function FlyerDetails() {
     });
   const templateName = template?.name ?? template?.title ?? "—";
   const status = flyer?.status ?? "draft";
-  const isDraft = String(status).toLowerCase() === "draft";
+  // const isDraft = String(status).toLowerCase() === "draft";
   const isPublished = String(status).toLowerCase() === "published";
 
   const getProductFromSlot = (s: any) =>
