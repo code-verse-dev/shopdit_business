@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, EditOutlined } from "@ant-design/icons";
 import { Button, Spin } from "antd";
 import { useNavigate, useParams } from "react-router";
 import { useGetProductQuery } from "../../redux/services/productService";
@@ -42,14 +42,24 @@ const ProductDetails = () => {
 
   return (
     <>
-      <div className="flex items-center gap-2 py-2">
+      <div className="flex items-center justify-between gap-2 py-2">
+        <div className="flex items-center gap-2">
+          <Button
+            type="text"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate("/product-listing")}
+            className="!p-0 !text-black dark:!text-white"
+          />
+          <h1 className="text-2xl font-semibold capitalize">Product Details</h1>
+        </div>
         <Button
-          type="text"
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate("/product-listing")}
-          className="!p-0 !text-black dark:!text-white"
-        />
-        <h1 className="text-2xl font-semibold capitalize">Product Details</h1>
+          type="primary"
+          icon={<EditOutlined />}
+          onClick={() => navigate(`/product-listing/${id}/edit`)}
+          className="web-btn"
+        >
+          Edit Product
+        </Button>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">

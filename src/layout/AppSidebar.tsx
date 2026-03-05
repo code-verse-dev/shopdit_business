@@ -28,6 +28,7 @@ import {
   // CircleStar,
   Briefcase,
   Gift,
+  Layers,
   Loader2,
   List,
   ListCheck,
@@ -84,6 +85,12 @@ const navItems: NavItem[] = [
     icon: <List />,
     name: "Products",
     path: "/product-listing",
+    requireProfile: true,
+  },
+  {
+    icon: <Layers />,
+    name: "Flyers",
+    path: "/flyers",
     requireProfile: true,
   },
   {
@@ -222,6 +229,7 @@ const AppSidebar: React.FC = () => {
       if (path === "/events" && p === "/add-event") return true;
       if (path === "/jobs" && p === "/add-job") return true;
       if (path === "/coupons" && p === "/add-coupon") return true;
+      if (path === "/flyers" && (p === "/flyers" || p === "/flyers/create" || p.startsWith("/flyers/"))) return true;
       return false;
     },
     [location.pathname]

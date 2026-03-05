@@ -18,10 +18,17 @@ export const productService = createApi({
   endpoints: (builder) => ({
     getBusinessProducts: builder.query<
       any,
-      { businessProfileId: string; page: number; limit: number }
+      { businessProfileId: string; page: number; limit: number; search?: string }
     >({
-      query: ({ businessProfileId, page, limit }) =>
-        `/getBusinessProducts?businessProfileId=${businessProfileId}&page=${page}&limit=${limit}`,
+      query: ({ businessProfileId, page, limit, search }) => {
+        const params = new URLSearchParams({
+          businessProfileId,
+          page: String(page),
+          limit: String(limit),
+        });
+        if (search && search.trim()) params.set("search", search.trim());
+        return `/getBusinessProducts?${params.toString()}`;
+      },
       providesTags: ["BusinessProducts"],
       transformErrorResponse,
     }),
@@ -39,6 +46,15 @@ export const productService = createApi({
       invalidatesTags: ["BusinessProducts"],
       transformErrorResponse,
     }),
+    updateProduct: builder.mutation<any, { id: string; formData: FormData }>({
+      query: ({ id, formData }) => ({
+        url: `/updateProduct/${id}`,
+        method: "PUT",
+        body: formData,
+      }),
+      invalidatesTags: ["BusinessProducts", "Product"],
+      transformErrorResponse,
+    }),
   }),
 });
 
@@ -46,4 +62,5 @@ export const {
   useGetBusinessProductsQuery,
   useGetProductQuery,
   useAddProductMutation,
+  useUpdateProductMutation,
 } = productService;

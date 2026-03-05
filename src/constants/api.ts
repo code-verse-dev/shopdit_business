@@ -26,7 +26,7 @@ if (hostname.includes("react.customdev.solutions")) {
 }
 
 export const SOCKET_URL = URL;
-export const UPLOADS_URL = `https://react.customdev.solutions:3011/Uploads/`;
+export const UPLOADS_URL = `${URL}/Uploads/`;
 export const BASE_URL = `${URL}/api`;
 export const PUBLIC_URL = publicUrl;
 export const ENV = enviroment;
