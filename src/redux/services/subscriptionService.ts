@@ -24,7 +24,18 @@ export const subscriptionService = createApi({
         return err;
       },
     }),
-    buySubscription: builder.mutation<any, { planId: string }>({
+    buySubscription: builder.mutation<
+      any,
+      {
+        planId: string;
+        cycle: "monthly" | "yearly";
+        cardNumber: string;
+        expDate: string;
+        cvv: string;
+        address: string;
+        zip: string;
+      }
+    >({
       query: (body) => ({
         url: "/subscription/buySubscription-web",
         method: "POST",

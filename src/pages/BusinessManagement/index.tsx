@@ -72,7 +72,7 @@ const UserManagement = () => {
         <button
           type="button"
           onClick={() => navigate("/business-profile")}
-          className="rounded-lg border border-primary-500 bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600 dark:border-primary-500 dark:bg-primary-500 dark:hover:bg-primary-600"
+          className="web-btn"
         >
           + Add business profile
         </button>
@@ -98,7 +98,7 @@ const UserManagement = () => {
             <button
               type="button"
               onClick={() => navigate("/business-profile")}
-              className="rounded-lg border border-primary-500 bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
+              className="web-btn"
             >
               + Add business profile
             </button>
