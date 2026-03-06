@@ -1,18 +1,18 @@
+import { useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import EcommerceMetrics from "../../components/ecommerce/EcommerceMetrics";
 import MonthlySalesChart from "../../components/ecommerce/MonthlySalesChart";
 import StatisticsChart from "../../components/ecommerce/StatisticsChart";
 import { useSelector } from "react-redux";
-import {
-  useFetchActiveSubscriptionQuery,
-  useBuySubscriptionMutation,
-} from "../../redux/services/subscriptionService";
+import { useFetchActiveSubscriptionQuery } from "../../redux/services/subscriptionService";
 import { useGetPlansQuery } from "../../redux/services/planService";
 import { useGetBusinessProfilesQuery } from "../../redux/services/businessService";
 import { useNavigate } from "react-router";
-import { SuccessPopup, ErrorPopup } from "../../components/popup/Popup";
+import { SuccessPopup } from "../../components/popup/Popup";
 import { Button } from "antd";
 import { Building2, CreditCard } from "lucide-react";
+import SubscriptionPaymentModal from "../../components/subscription/SubscriptionPaymentModal";
+import type { PlanForPayment } from "../../components/subscription/SubscriptionPaymentModal";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -88,18 +88,18 @@ function SubscriptionPlansOnly() {
     undefined,
     { skip: false }
   );
-  const [buySubscription, { isLoading: buying }] =
-    useBuySubscriptionMutation();
+  const [selectedPlan, setSelectedPlan] = useState<PlanForPayment | null>(null);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
 
   const plans = plansData?.data ?? plansData ?? [];
 
-  const handleBuy = async (planId: string) => {
-    try {
-      await buySubscription({ planId }).unwrap();
-      SuccessPopup("Subscription activated.");
-    } catch (err: any) {
-      ErrorPopup(err?.data?.message || "Failed to subscribe.");
-    }
+  const handleBuyPlan = (plan: PlanForPayment) => {
+    setSelectedPlan(plan);
+    setPaymentModalOpen(true);
+  };
+
+  const handlePaymentSuccess = () => {
+    SuccessPopup("Subscription activated.");
   };
 
   return (
@@ -136,8 +136,7 @@ function SubscriptionPlansOnly() {
               <Button
                 type="primary"
                 className="mt-4 web-btn"
-                loading={buying}
-                onClick={() => handleBuy(plan._id)}
+                onClick={() => handleBuyPlan(plan)}
               >
                 Buy plan
               </Button>
@@ -146,6 +145,19 @@ function SubscriptionPlansOnly() {
         </div>
       ) : (
         <p className="text-gray-500 text-sm">No plans available at the moment.</p>
+      )}
+
+      {selectedPlan && (
+        <SubscriptionPaymentModal
+          isOpen={paymentModalOpen}
+          onClose={() => {
+            setPaymentModalOpen(false);
+            setSelectedPlan(null);
+          }}
+          onSuccess={handlePaymentSuccess}
+          amount={Number(selectedPlan.price ?? selectedPlan.amount ?? 0)}
+          plan={selectedPlan}
+        />
       )}
     </div>
   );
