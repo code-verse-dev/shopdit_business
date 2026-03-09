@@ -69,6 +69,36 @@ export default function Flyers() {
     { skip: !businessProfileId }
   );
 
+  // Stats: backend doesn't send stats — count by status from docs.
+  // When viewing "All" with no search, use main list response so stats match the same data.
+  // Otherwise use a dedicated fetch (limit=500) for stats.
+  const { data: statsListData } = useGetFlyersQuery(
+    { page: 1, limit: 500, businessProfileId: businessProfileId ?? undefined },
+    { skip: !businessProfileId || (statusFilter === "" && !search.trim()) }
+  );
+
+  const mainDocs = data?.data?.docs ?? data?.docs ?? [];
+  const mainListForStats = Array.isArray(mainDocs) ? mainDocs : [];
+  const statsDocs = statsListData?.data?.docs ?? statsListData?.docs ?? [];
+  const statsListFromQuery = Array.isArray(statsDocs) ? statsDocs : [];
+
+  const listToCount =
+    statusFilter === "" && !search.trim()
+      ? mainListForStats
+      : statsListFromQuery;
+
+  const totalFlyers =
+    statusFilter === "" && !search.trim()
+      ? (data?.data?.totalDocs ?? data?.totalDocs ?? 0) || listToCount.length
+      : (statsListData?.data?.totalDocs ?? statsListData?.totalDocs ?? 0) || listToCount.length;
+
+  const getStatus = (f: any) =>
+    String(f?.status ?? f?.statusName ?? f?.state ?? "").toLowerCase();
+
+  const publishedCount = listToCount.filter((f: any) => getStatus(f) === "published").length;
+  const draftCount = listToCount.filter((f: any) => getStatus(f) === "draft").length;
+  const expiredCount = listToCount.filter((f: any) => getStatus(f) === "expired").length;
+
   // const [deleteFlyer] = useDeleteFlyerMutation();
   const [publishFlyer, { isLoading: isPublishing }] = usePublishFlyerMutation();
   const [unpublishFlyer, { isLoading: isUnpublishing }] =
@@ -81,24 +111,6 @@ export default function Flyers() {
 
   const docs = data?.data?.docs ?? data?.data ?? data?.docs ?? data ?? [];
   const list = Array.isArray(docs) ? docs : [];
-  const res = data?.data ?? data ?? {};
-  const stats = res.stats ?? res.statusCounts ?? res.counts ?? null;
-  const totalFlyers = res.totalDocs ?? res.total ?? data?.totalDocs ?? data?.total ?? 0;
-
-  // Helper to get count from stats array, e.g. [{ status: 'published', count: 2 }, ...]
-  const getCountFromArray = (status: string) => {
-    const arr = Array.isArray(stats) ? stats : Array.isArray(res.statusCounts) ? res.statusCounts : null;
-    if (!arr) return undefined;
-    const entry = arr.find((s: any) => String(s?.status ?? s?.name ?? "").toLowerCase() === status);
-    return entry?.count ?? entry?.total ?? undefined;
-  };
-
-  const publishedCount =
-    stats?.published ?? stats?.publishedCount ?? res.published ?? res.publishedCount ?? getCountFromArray("published") ?? 0;
-  const draftCount =
-    stats?.draft ?? stats?.draftCount ?? res.draft ?? res.draftCount ?? getCountFromArray("draft") ?? 0;
-  const expiredCount =
-    stats?.expired ?? stats?.expiredCount ?? res.expired ?? res.expiredCount ?? getCountFromArray("expired") ?? 0;
 
   // const handleDelete = useCallback(
   //   (flyer: any) => {
