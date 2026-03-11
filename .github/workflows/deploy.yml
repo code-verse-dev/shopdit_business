@@ -44,7 +44,6 @@ jobs:
             username: ${{ vars.FTP_USERNAME }}
             password: ${{ secrets.FTP_PASSWORD }}
             protocol: ftp
-            port: 22
             local-dir: ./dist/
   
   health-check:
