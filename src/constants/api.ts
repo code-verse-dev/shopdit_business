@@ -3,7 +3,7 @@ const { hostname } = window.location;
 const servers = {
   local: "http://localhost:3011",
   customDev: "https://react.customdev.solutions:3011",
-  live: "",
+  live: "https://api.shopditusa.com",
   dummy: "https://9d2f-204-157-158-10.ngrok-free.app",
 };
 
@@ -13,7 +13,7 @@ type Environment = "development" | "customdev" | "live";
 
 let enviroment: Environment = "development";
 
-let publicUrl = "/";
+let publicUrl = "/shopdit-business";
 
 if (hostname.includes("react.customdev.solutions")) {
   URL = servers.customDev;
@@ -31,15 +31,13 @@ export const BASE_URL = `${URL}/api`;
 export const PUBLIC_URL = publicUrl;
 export const ENV = enviroment;
 
-/**
- * Loyalty Dashboard (separate frontend) base URL.
- * When the user clicks "Loyalty Dashboard" in the sidebar, they are sent here
- * with the current JWT in the URL hash so they land already authenticated.
- * Set per environment (e.g. localhost for dev, production URL for live).
- */
 export const LOYALTY_DASHBOARD_URL =
   typeof import.meta.env?.VITE_LOYALTY_DASHBOARD_URL === "string"
     ? import.meta.env.VITE_LOYALTY_DASHBOARD_URL.replace(/\/$/, "")
     : hostname.includes("localhost")
     ? "http://localhost:3000"
+    : hostname.includes("react.customdev.solutions")
+    ? "https://react.customdev.solutions/shopdit/loyalty-dash/"
+    : hostname.includes("shopditusa.com") || hostname.includes("shopdit")
+    ? "https://react.shopditusa.com/loyalty-dash/"
     : "https://react.customdev.solutions/shopdit/loyalty-dash/";
