@@ -44,7 +44,7 @@ jobs:
             username: ${{ vars.FTP_USERNAME }}
             password: ${{ secrets.FTP_PASSWORD }}
             protocol: ftp
-            local-dir: ./build/
+            local-dir: ./dist/
   
   health-check:
       name: Health Check
