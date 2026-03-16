@@ -35,9 +35,9 @@ export const LOYALTY_DASHBOARD_URL =
   typeof import.meta.env?.VITE_LOYALTY_DASHBOARD_URL === "string"
     ? import.meta.env.VITE_LOYALTY_DASHBOARD_URL.replace(/\/$/, "")
     : hostname.includes("localhost")
-    ? "http://localhost:3000"
+    ? "https://react.customdev.solutions/shopdit/loyalty-dash/"
     : hostname.includes("react.customdev.solutions")
     ? "https://react.customdev.solutions/shopdit/loyalty-dash/"
     : hostname.includes("shopditusa.com") || hostname.includes("shopdit")
-    ? "https://react.shopditusa.com/loyalty-dash/"
+    ? "https://react.customdev.solutions/shopdit/loyalty-dash/"
     : "https://react.customdev.solutions/shopdit/loyalty-dash/";
