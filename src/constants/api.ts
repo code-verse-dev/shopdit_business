@@ -13,7 +13,7 @@ type Environment = "development" | "customdev" | "live";
 
 let enviroment: Environment = "development";
 
-let publicUrl = "/shopdit-business";
+let publicUrl = "/";
 
 if (hostname.includes("react.customdev.solutions")) {
   URL = servers.customDev;

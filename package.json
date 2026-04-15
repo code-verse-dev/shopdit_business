@@ -20,6 +20,8 @@
     "@react-jvectormap/core": "^1.0.4",
     "@react-jvectormap/world": "^1.1.2",
     "@reduxjs/toolkit": "^2.8.2",
+    "@stripe/react-stripe-js": "^6.1.0",
+    "@stripe/stripe-js": "^9.2.0",
     "ag-grid-community": "^34.0.1",
     "ag-grid-enterprise": "^34.0.1",
     "ag-grid-react": "^34.0.1",

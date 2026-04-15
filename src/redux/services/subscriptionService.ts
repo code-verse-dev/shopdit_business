@@ -15,6 +15,10 @@ export const subscriptionService = createApi({
   }),
   tagTypes: ["ActiveSubscription"],
   endpoints: (builder) => ({
+    fetchPaymentConfig: builder.query<any, void>({
+      query: () => "/payment/config",
+      transformErrorResponse,
+    }),
     /** Returns active subscription or 404 when none. */
     fetchActiveSubscription: builder.query<any, void>({
       query: () => "/subscription/fetchActiveSubscription",
@@ -24,30 +28,63 @@ export const subscriptionService = createApi({
         return err;
       },
     }),
-    buySubscription: builder.mutation<
+    createSubscriptionPaymentIntent: builder.mutation<
       any,
       {
         planId: string;
         cycle: "monthly" | "yearly";
-        cardNumber: string;
-        expDate: string;
-        cvv: string;
-        address: string;
-        zip: string;
+        currency?: string;
       }
     >({
       query: (body) => ({
-        url: "/subscription/buySubscription-web",
+        url: "/subscription/create-subscription-payment-intent",
+        method: "POST",
+        body,
+      }),
+      transformErrorResponse,
+    }),
+    saveSubscriptionPaymentStripe: builder.mutation<
+      any,
+      {
+        paymentIntentId: string;
+      }
+    >({
+      query: (body) => ({
+        url: "/subscription/save-subscription-payment-stripe",
         method: "POST",
         body,
       }),
       invalidatesTags: ["ActiveSubscription"],
       transformErrorResponse,
     }),
+    createConnectOnboardingLink: builder.mutation<
+      any,
+      {
+        refreshUrl: string;
+        returnUrl: string;
+      }
+    >({
+      query: (body) => ({
+        url: "/subscription/create-connect-onboarding-link",
+        method: "POST",
+        body,
+      }),
+      transformErrorResponse,
+    }),
+    fetchConnectAccountStatus: builder.query<any, void>({
+      query: () => "/subscription/connect-account-status",
+      transformErrorResponse,
+    }),
   }),
 });
 
 export const {
+  useFetchPaymentConfigQuery,
   useFetchActiveSubscriptionQuery,
-  useBuySubscriptionMutation,
+  useLazyFetchActiveSubscriptionQuery,
+  useCreateSubscriptionPaymentIntentMutation,
+  useSaveSubscriptionPaymentStripeMutation,
+  useCreateConnectOnboardingLinkMutation,
+  useFetchConnectAccountStatusQuery,
+  useLazyFetchConnectAccountStatusQuery,
 } = subscriptionService;
