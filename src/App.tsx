@@ -64,6 +64,7 @@ import AddCustomer from "./pages/customer/addCustomer";
 import ProtectedRoute from "./routes/auth-route";
 import ConnectReturn from "./pages/connect/ConnectReturn";
 import ConnectRefresh from "./pages/connect/ConnectRefresh";
+import SubscriptionPaymentPage from "./pages/subscription/SubscriptionPaymentPage";
 
 interface RouteConfig {
   path: string;
@@ -280,6 +281,11 @@ const routesConfig: RouteConfig[] = [
     element: <FlyerDetails />,
 
     title: "Flyer Details",
+  },
+  {
+    path: "/subscription/pay",
+    element: <SubscriptionPaymentPage />,
+    title: "Subscribe",
   },
   {
     path: "/connect",

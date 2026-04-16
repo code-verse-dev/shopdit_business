@@ -25,7 +25,7 @@ export const eventService = createApi({
       transformErrorResponse,
     }),
     getEvent: builder.query<any, string>({
-      query: (id) => `/getEvent/${id}`,
+      query: (id) => `/getEventForBusiness/${id}`,
       providesTags: (_result, _err, id) => [{ type: "Event", id }],
       transformErrorResponse,
     }),
