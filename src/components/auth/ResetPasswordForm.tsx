@@ -1,11 +1,18 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Button from "../ui/button/Button";
 import { EyeCloseIcon, EyeIcon } from "../../icons";
 import { ImageUrl } from '../../utils/Functions';
+import {
+  RESET_ACCOUNT_TYPE,
+  useResetPasswordMutation,
+} from "../../redux/services/authSlice";
+import { ErrorPopup } from "../popup/Popup";
+
+type LocationState = { email?: string; code?: string };
 
 export default function ResetPasswordForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -13,8 +20,19 @@ export default function ResetPasswordForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = (location.state as LocationState | null) ?? {};
+  const email = state.email?.trim() ?? "";
+  const code = state.code?.trim() ?? "";
+  const [resetPassword] = useResetPasswordMutation();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    if (!email || !code) {
+      navigate("/forgotpassword", { replace: true });
+    }
+  }, [email, code, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -29,21 +47,34 @@ export default function ResetPasswordForm() {
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
+    if (!email || !code) {
       setLoading(false);
+      navigate("/forgotpassword", { replace: true });
+      return;
+    }
+
+    try {
+      await resetPassword({
+        email,
+        code,
+        password,
+        type: RESET_ACCOUNT_TYPE,
+      }).unwrap();
 
       Swal.fire({
         icon: "success",
         title: "Password Reset Successful!",
         text: "You can now log in with your new password.",
-        confirmButtonColor: "#F6075A", // optional custom color
-        confirmButtonText: "Go to Login"
+        confirmButtonColor: "#F6075A",
+        confirmButtonText: "Go to Login",
       }).then(() => {
-        navigate("/signin"); // redirect after alert close
+        navigate("/signin");
       });
-
-    }, 1000);
+    } catch (err: any) {
+      ErrorPopup(err?.data?.message ?? "Could not reset password.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

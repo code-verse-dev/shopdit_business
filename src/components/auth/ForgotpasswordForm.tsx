@@ -4,20 +4,42 @@ import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Button from "../ui/button/Button";
 import { ImageUrl } from '../../utils/Functions';
+import {
+    RESET_ACCOUNT_TYPE,
+    useSendVerificationCodeMutation,
+} from "../../redux/services/authSlice";
+import { ErrorPopup, SuccessPopup } from "../popup/Popup";
 
 export default function ForgotPasswordForm() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const [sendVerificationCode] = useSendVerificationCodeMutation();
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
 
+        const formData = new FormData(e.currentTarget);
+        const email = (formData.get("email") as string)?.trim();
 
-        setTimeout(() => {
+        if (!email) {
             setLoading(false);
-            navigate("/verification-code");
-        }, 1000);
+            ErrorPopup("Please enter your email.");
+            return;
+        }
+
+        try {
+            await sendVerificationCode({
+                email,
+                type: RESET_ACCOUNT_TYPE,
+            }).unwrap();
+            SuccessPopup("Check your email for a verification code.");
+            navigate("/verification-code", { state: { email } });
+        } catch (err: any) {
+            ErrorPopup(err?.data?.message ?? "Could not send verification code.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -51,7 +73,7 @@ export default function ForgotPasswordForm() {
                                     type="email"
                                     placeholder="info@gmail.com"
                                     name="email"
-                                    //   required
+                                    required
                                     className="web-input"
                                 />
                             </div>

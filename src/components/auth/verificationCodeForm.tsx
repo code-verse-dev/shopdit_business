@@ -1,23 +1,41 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 import VerificationInput from "react-verification-input";
 import Button from "../ui/button/Button";
 import { ImageUrl } from '../../utils/Functions';
+import { useVerifyRecoverCodeMutation } from "../../redux/services/authSlice";
+import { ErrorPopup } from "../popup/Popup";
+
+type ForgotFlowLocationState = { email?: string };
 
 export default function VerificationCode() {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const email = (location.state as ForgotFlowLocationState | null)?.email?.trim();
+  const [verifyRecoverCode] = useVerifyRecoverCodeMutation();
 
-  const handleVerify = (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    if (!email) {
+      navigate("/forgotpassword", { replace: true });
+    }
+  }, [email, navigate]);
+
+  const handleVerify = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!email) return;
+
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      await verifyRecoverCode({ email, code }).unwrap();
+      navigate("/reset-password", { state: { email, code } });
+    } catch (err: any) {
+      ErrorPopup(err?.data?.message ?? "Invalid or expired code.");
+    } finally {
       setLoading(false);
-      // Here you can validate code if needed
-      navigate("/reset-password"); // Go to next page
-    }, 1000);
+    }
   };
 
   return (

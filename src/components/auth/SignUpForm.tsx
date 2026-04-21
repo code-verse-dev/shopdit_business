@@ -1,7 +1,4 @@
-import {
-  EyeInvisibleOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
+import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, Select } from "antd";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
@@ -27,7 +24,9 @@ const SignUpForm: React.FC = () => {
 
   const handleSubmit = async (values: SignUpFormValues) => {
     if (!values.agreeTerms) {
-      form.setFields([{ name: "agreeTerms", errors: ["Please accept the terms"] }]);
+      form.setFields([
+        { name: "agreeTerms", errors: ["Please accept the terms"] },
+      ]);
       return;
     }
     const formData = new FormData();
@@ -49,17 +48,15 @@ const SignUpForm: React.FC = () => {
 
   return (
     <div className="md:w-4xl my-4">
-    <div className="bg-white p-8 rounded-lg">
-      
-
-         <div className="mb-5 sm:mb-8">
-            <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md text-center">
+      <div className="bg-white p-8 rounded-lg">
+        <div className="mb-5 sm:mb-8">
+          <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md text-center">
             Create Account
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
             Fill out this form to sign up
-            </p>
-          </div>
+          </p>
+        </div>
 
         <Form
           form={form}
@@ -84,7 +81,7 @@ const SignUpForm: React.FC = () => {
               label="Email Address*"
               rules={[
                 { required: true, message: "Please enter your email" },
-                { type: "email", message: "Please enter a valid email" }
+                { type: "email", message: "Please enter a valid email" },
               ]}
               className="form-col"
             >
@@ -97,22 +94,22 @@ const SignUpForm: React.FC = () => {
               rules={[{ required: true, message: "Please select your gender" }]}
               className="form-col"
             >
-              <Select placeholder="Select Gender"  className="web-input">
+              <Select placeholder="Select Gender" className="web-input">
                 <Option value="MALE">Male</Option>
                 <Option value="FEMALE">Female</Option>
-                <Option value="OTHER">Other</Option>
+                <Option value="OTHERS">Other</Option>
               </Select>
             </Form.Item>
           </div>
-
-  
 
           {/* Password + Confirm Password */}
           <div className="form-row">
             <Form.Item
               name="password"
               label="Password"
-              rules={[{ required: true, message: "Please enter your password" }]}
+              rules={[
+                { required: true, message: "Please enter your password" },
+              ]}
               className="form-col"
             >
               <Input.Password
@@ -121,7 +118,6 @@ const SignUpForm: React.FC = () => {
                 iconRender={(visible) =>
                   visible ? <EyeOutlined /> : <EyeInvisibleOutlined />
                 }
-                
               />
             </Form.Item>
 
@@ -136,11 +132,9 @@ const SignUpForm: React.FC = () => {
                     if (!value || getFieldValue("password") === value) {
                       return Promise.resolve();
                     }
-                    return Promise.reject(
-                      new Error("Passwords do not match")
-                    );
-                  }
-                })
+                    return Promise.reject(new Error("Passwords do not match"));
+                  },
+                }),
               ]}
               className="form-col"
             >
@@ -174,7 +168,9 @@ const SignUpForm: React.FC = () => {
             rules={[
               {
                 validator: (_, value) =>
-                  value ? Promise.resolve() : Promise.reject(new Error("Please accept the terms")),
+                  value
+                    ? Promise.resolve()
+                    : Promise.reject(new Error("Please accept the terms")),
               },
             ]}
           >
@@ -188,10 +184,10 @@ const SignUpForm: React.FC = () => {
                   window.open("/terms", "_blank", "noopener,noreferrer");
                 }}
               >
-                Terms & Condition {" "}
-              </Link> 
-                and  {" "}
-               <Link
+                Terms & Condition{" "}
+              </Link>
+              and{" "}
+              <Link
                 to="/privacy"
                 className="terms-link"
                 onClick={(e) => {
@@ -199,12 +195,12 @@ const SignUpForm: React.FC = () => {
                   window.open("/privacy", "_blank", "noopener,noreferrer");
                 }}
               >
-                 Privacy Policy
-              </Link>.
+                Privacy Policy
+              </Link>
+              .
             </Checkbox>
           </Form.Item>
 
-     
           {/* Submit Button */}
           <Form.Item>
             <Button
@@ -221,11 +217,8 @@ const SignUpForm: React.FC = () => {
           {/* Already have account */}
           <div className="auth-prompt">
             <span>Already have an account? </span>
-            <Button
-              className="auth-link"
-              onClick={() => navigate("/signin")}
-            >
-               SIGN IN
+            <Button className="auth-link" onClick={() => navigate("/signin")}>
+              SIGN IN
             </Button>
           </div>
         </Form>

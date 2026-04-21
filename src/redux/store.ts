@@ -17,6 +17,7 @@ import { campaignManagementService } from "./services/campaignsService";
 import { analyticsService } from "./services/dashboardAnalytics";
 import { planService } from "./services/planService";
 import { subscriptionService } from "./services/subscriptionService";
+import { paymentService } from "./services/paymentService";
 import { businessTypeService } from "./services/businessTypeService";
 import { jobService } from "./services/jobService";
 import { applicationService } from "./services/applicationService";
@@ -70,6 +71,7 @@ export const store = configureStore({
       analyticsService.middleware,
       planService.middleware,
       subscriptionService.middleware,
+      paymentService.middleware,
       businessTypeService.middleware,
       jobService.middleware,
       applicationService.middleware,

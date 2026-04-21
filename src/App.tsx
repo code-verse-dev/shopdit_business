@@ -1,4 +1,4 @@
-import { Route, BrowserRouter as Router, Routes } from "react-router";
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import AppLayout from "./layout/AppLayout";
 import SignIn from "./pages/AuthPages/SignIn";
@@ -62,6 +62,9 @@ import AddProduct from "./pages/productListing/addProduct";
 import EditProduct from "./pages/productListing/editProduct";
 import AddCustomer from "./pages/customer/addCustomer";
 import ProtectedRoute from "./routes/auth-route";
+import ConnectReturn from "./pages/connect/ConnectReturn";
+import ConnectRefresh from "./pages/connect/ConnectRefresh";
+import SubscriptionPaymentPage from "./pages/subscription/SubscriptionPaymentPage";
 
 interface RouteConfig {
   path: string;
@@ -278,6 +281,26 @@ const routesConfig: RouteConfig[] = [
     element: <FlyerDetails />,
 
     title: "Flyer Details",
+  },
+  {
+    path: "/subscription/pay",
+    element: <SubscriptionPaymentPage />,
+    title: "Subscribe",
+  },
+  {
+    path: "/connect",
+    element: <Navigate to="/" replace />,
+    title: "Dashboard",
+  },
+  {
+    path: "/connect/return",
+    element: <ConnectReturn />,
+    title: "Stripe Connect",
+  },
+  {
+    path: "/connect/refresh",
+    element: <ConnectRefresh />,
+    title: "Stripe Connect",
   },
 ];
 
