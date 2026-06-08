@@ -43,8 +43,9 @@ jobs:
         uses: wlixcc/SFTP-Deploy-Action@v1.2.5
         with:
           server: ${{ vars.SERVER }}
-          username: ${{ vars.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
+          username: ${{ vars.CPANEL_USERNAME }}
+          # username: ${{ vars.FTP_USERNAME }}
+          # password: ${{ secrets.FTP_PASSWORD }}
           # protocol: ftp
           port: 22
           # local-dir: ./dist/
