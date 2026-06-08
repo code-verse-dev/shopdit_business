@@ -45,10 +45,14 @@ jobs:
           server: ${{ vars.SERVER }}
           username: ${{ vars.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          port: 21
-          local-dir: ./dist/
-          server-dir: /${{ vars.SERVER_DIR }}/
+          # protocol: ftp
+          port: 22
+          # local-dir: ./dist/
+          # server-dir: /${{ vars.SERVER_DIR }}/
+          local_path: './dist/*'
+          remote_path: '/home/shopditusa/public_html/business.shopditusa.com/'
+          sftp_only: true  
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
 
   health-check:
     name: Health Check
