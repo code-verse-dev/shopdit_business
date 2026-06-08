@@ -43,5 +43,4 @@ export const BASE_URL = `${URL}/api`;
 export const PUBLIC_URL = publicUrl;
 export const ENV = enviroment;
 
-/** Loyalty dashboard – sidebar SSO link (JWT passed in URL hash). */
 export const LOYALTY_DASHBOARD_URL = portalUrls;
