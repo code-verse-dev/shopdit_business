@@ -40,7 +40,7 @@ jobs:
         run: npm run build
 
       - name: 📂 Sync files
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.5
         with:
           server: ${{ vars.SERVER }}
           username: ${{ vars.FTP_USERNAME }}
