@@ -27,9 +27,6 @@ if (hostname.includes("react.customdev.solutions")) {
 } else if (hostname.includes("localhost")) {
   URL = servers.local;
   enviroment = "development";
-} else if (hostname.includes("devtunnels.ms")) {
-  URL = servers.dummy;
-  enviroment = "development";
 } else {
   URL = servers.live;
   enviroment = "live";
