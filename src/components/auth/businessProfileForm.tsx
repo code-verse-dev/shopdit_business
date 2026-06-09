@@ -1,4 +1,6 @@
 import React, { useMemo, useState } from "react";
+import { GoogleBusinessSearch } from "../GoogleBusinessSearch";
+import { GooglePlacesSearch } from "../GooglePlacesSearch";
 import { Button, Form, Input, Select } from "antd";
 import { useNavigate } from "react-router";
 import { FiUploadCloud } from "react-icons/fi";
@@ -55,6 +57,10 @@ const BusinessProfileForm: React.FC = () => {
   const navigate = useNavigate();
   const [createProfile, { isLoading }] = useCreateProfileMutation();
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [locationCoordinates, setLocationCoordinates] = useState<
+    [number, number]
+  >([0, 0]);
+  const [googlePlaceId, setGooglePlaceId] = useState<string | null>(null);
   const businessTypeId = Form.useWatch("businessType", form);
 
   const { data: businessTypesData, isLoading: businessTypesLoading } =
@@ -108,7 +114,7 @@ const BusinessProfileForm: React.FC = () => {
       "location",
       JSON.stringify({
         type: "Point",
-        coordinates: [0, 0],
+        coordinates: locationCoordinates,
         address: values.locationAddress ?? "",
       })
     );
@@ -119,12 +125,13 @@ const BusinessProfileForm: React.FC = () => {
     formData.append("facebook", values.facebook ?? "");
     formData.append("instagram", values.instagram ?? "");
     formData.append("tikTok", values.tikTok ?? "");
-    if (values.importedReviews) {
-      formData.append("importedReviews", values.importedReviews);
-    }
+    // if (values.importedReviews) {
+    //   formData.append("importedReviews", values.importedReviews);
+    // }
     if (imageFile) {
       formData.append("image", imageFile);
     }
+    formData.append("google_place_id", googlePlaceId ?? "");
     try {
       await createProfile(formData).unwrap();
       SuccessPopup("Business profile created.");
@@ -187,26 +194,14 @@ const BusinessProfileForm: React.FC = () => {
             </Form.Item>
           </div>
 
-          <Form.Item
-            name="addressLineOne"
-            label="Address line 1"
-            rules={[
-              { required: true, message: "Address line 1 is required" },
-            ]}
-          >
+          <Form.Item name="addressLineOne" label="Address line 1">
             <Input
               placeholder="Street, building, suite"
               className="web-input"
             />
           </Form.Item>
 
-          <Form.Item
-            name="addressLineTwo"
-            label="Address line 2"
-            rules={[
-              { required: true, message: "Address line 2 is required" },
-            ]}
-          >
+          <Form.Item name="addressLineTwo" label="Address line 2">
             <Input placeholder="Floor, unit, etc." className="web-input" />
           </Form.Item>
 
@@ -221,9 +216,14 @@ const BusinessProfileForm: React.FC = () => {
           <Form.Item
             name="locationAddress"
             label="Location (address string)"
-            help="e.g. city name or full address for map display"
+            help="Filling the address fields below is optional if you select a location above."
           >
-            <Input placeholder="e.g. Nashville, TN" className="web-input" />
+            <GooglePlacesSearch
+              placeholder="Search address, e.g. Nashville, TN"
+              className="web-input"
+              onPlaceSelect={(loc) => setLocationCoordinates(loc.coordinates)}
+              onClearGeo={() => setLocationCoordinates([0, 0])}
+            />
           </Form.Item>
 
           <Form.Item
@@ -300,12 +300,12 @@ const BusinessProfileForm: React.FC = () => {
             <Input placeholder="Username or URL" className="web-input" />
           </Form.Item>
 
-          <Form.Item name="importedReviews" label="Imported Reviews (optional)">
+          {/* <Form.Item name="importedReviews" label="Imported Reviews (optional)">
             <Input
               placeholder="Paste or describe imported reviews"
               className="web-input"
             />
-          </Form.Item>
+          </Form.Item> */}
 
           <Form.Item label="Profile Image">
             <div
@@ -338,6 +338,10 @@ const BusinessProfileForm: React.FC = () => {
                 </button>
               </div>
             )}
+          </Form.Item>
+
+          <Form.Item label="Link Google Business Profile (optional)">
+            <GoogleBusinessSearch onBusinessSelect={setGooglePlaceId} />
           </Form.Item>
 
           <Form.Item>
