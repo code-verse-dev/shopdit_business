@@ -32,6 +32,7 @@ import {
   Loader2,
   List,
   ListCheck,
+  Sparkles,
   Ticket,
 } from "lucide-react";
 import { useSelector } from "react-redux";
@@ -54,6 +55,11 @@ const navItems: NavItem[] = [
     icon: <GridIcon />,
     name: "Dashboard",
     path: "/",
+  },
+  {
+    icon: <Sparkles />,
+    name: "AI Studio",
+    path: "/studio",
   },
   {
     icon: <BiSolidChart />,
