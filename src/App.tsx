@@ -65,6 +65,7 @@ import ProtectedRoute from "./routes/auth-route";
 import ConnectReturn from "./pages/connect/ConnectReturn";
 import ConnectRefresh from "./pages/connect/ConnectRefresh";
 import SubscriptionPaymentPage from "./pages/subscription/SubscriptionPaymentPage";
+import ShopDitStudio from "./pages/studio";
 
 interface RouteConfig {
   path: string;
@@ -80,6 +81,11 @@ const routesConfig: RouteConfig[] = [
 
     title: "Dashboard",
     activeTab: "dashboard",
+  },
+  {
+    path: "/studio",
+    element: <ShopDitStudio />,
+    title: "AI Studio",
   },
   {
     path: "/profile",
