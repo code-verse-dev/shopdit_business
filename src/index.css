@@ -1315,6 +1315,38 @@ line-height: normal;
   transform: rotate(-0.4deg);
 }
 
+.studio-preview-thumb.ant-image,
+.studio-preview-dock.ant-image {
+  overflow: hidden;
+  border-radius: 1rem;
+  cursor: zoom-in;
+}
+
+.studio-preview-thumb .ant-image-img {
+  height: 7rem;
+  width: 7rem;
+  object-fit: cover;
+}
+
+.studio-preview-dock .ant-image-img {
+  height: 72px;
+  width: 72px;
+  object-fit: cover;
+}
+
+.studio-preview-print.ant-image {
+  display: block;
+  width: 100%;
+  cursor: zoom-in;
+}
+
+.studio-preview-print .ant-image-img {
+  width: 100%;
+  max-height: 20rem;
+  object-fit: cover;
+  border-radius: 0.75rem;
+}
+
 .studio-dock {
   background: rgba(255, 252, 248, 0.86);
   backdrop-filter: blur(18px);

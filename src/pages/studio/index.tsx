@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
-import { message } from "antd";
+import { Image, message } from "antd";
 import {
   CheckOutlined,
   CloseOutlined,
@@ -70,6 +70,81 @@ function attachmentKind(file: AiFile | string): "document" | "image" {
   return file.kind === "image" ? "image" : "document";
 }
 
+function attachmentSrc(file: AiFile | string) {
+  if (typeof file === "string") return file ? UPLOADS_URL + file : "";
+  return file.filename ? UPLOADS_URL + file.filename : "";
+}
+
+type BriefAttachment = {
+  name: string;
+  kind: "document" | "image";
+  src?: string;
+  previewUrl?: string;
+};
+
+function PreviewableImage({
+  src,
+  alt,
+  variant,
+}: {
+  src: string;
+  alt: string;
+  variant: "thumb" | "dock" | "print";
+}) {
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      rootClassName={`studio-preview-${variant}`}
+      preview={{ mask: "Preview" }}
+    />
+  );
+}
+
+function BriefMedia({
+  content,
+  attachments = [],
+}: {
+  content?: string;
+  attachments?: BriefAttachment[];
+}) {
+  const images = attachments.filter((a) => a.kind === "image" && (a.previewUrl || a.src));
+  const docs = attachments.filter((a) => a.kind !== "image");
+  return (
+    <>
+      {images.length ? (
+        <div className="mb-3 flex flex-wrap gap-2">
+          <Image.PreviewGroup>
+            {images.map((a, i) => (
+              <PreviewableImage
+                key={`${a.name}-${i}`}
+                src={a.previewUrl || a.src || ""}
+                alt={a.name}
+                variant="thumb"
+              />
+            ))}
+          </Image.PreviewGroup>
+        </div>
+      ) : null}
+      {content ? (
+        <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
+      ) : null}
+      {docs.length ? (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {docs.map((a, i) => (
+            <span
+              key={`${a.name}-${i}`}
+              className="rounded-full bg-white/12 px-2.5 py-0.5 text-[11px] text-white/85"
+            >
+              Ref · {a.name}
+            </span>
+          ))}
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 function InkMeter({ remaining, spentPct }: { remaining: number; spentPct: number }) {
   const left = Math.max(0, Math.min(100, 100 - spentPct));
   return (
@@ -106,9 +181,12 @@ export default function ShopDitStudio() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [pendingUser, setPendingUser] = useState<{
     content: string;
-    attachments: { name: string; kind: "document" | "image" }[];
+    attachments: BriefAttachment[];
   } | null>(null);
   const [packagesOpen, setPackagesOpen] = useState(false);
+  const [pendingPreviews, setPendingPreviews] = useState<
+    { file: File; url: string; isImage: boolean }[]
+  >([]);
   const promptedRef = useRef(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -153,6 +231,20 @@ export default function ShopDitStudio() {
       setActiveId(conversations[0]._id);
     }
   }, [activeId, conversations]);
+
+  useEffect(() => {
+    const next = pendingFiles.map((file) => ({
+      file,
+      isImage: file.type.startsWith("image/"),
+      url: file.type.startsWith("image/") ? URL.createObjectURL(file) : "",
+    }));
+    setPendingPreviews(next);
+    return () => {
+      next.forEach((item) => {
+        if (item.url) URL.revokeObjectURL(item.url);
+      });
+    };
+  }, [pendingFiles]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -213,12 +305,14 @@ export default function ShopDitStudio() {
     }
 
     const files = pendingFiles;
+    const attachments: BriefAttachment[] = files.map((f) => ({
+      name: f.name,
+      kind: f.type.startsWith("image/") ? "image" : "document",
+      previewUrl: f.type.startsWith("image/") ? URL.createObjectURL(f) : undefined,
+    }));
     setPendingUser({
       content: text || (imageMode ? "Generate an image" : "See attached files."),
-      attachments: files.map((f) => ({
-        name: f.name,
-        kind: f.type.startsWith("image/") ? "image" : "document",
-      })),
+      attachments,
     });
     setDraft("");
     setPendingFiles([]);
@@ -228,7 +322,7 @@ export default function ShopDitStudio() {
       const conversationId = await ensureConversation();
       if (imageMode) {
         if (!text) throw new Error("Describe the image to generate.");
-        await generateImage({ conversationId, prompt: text }).unwrap();
+        await generateImage({ conversationId, prompt: text, files }).unwrap();
       } else {
         await sendMessage({ conversationId, content: text, files }).unwrap();
       }
@@ -242,6 +336,9 @@ export default function ShopDitStudio() {
         messageApi.error(aiErrorMessage(err, "Studio could not complete that turn."));
       }
     } finally {
+      attachments.forEach((a) => {
+        if (a.previewUrl) URL.revokeObjectURL(a.previewUrl);
+      });
       setPendingUser(null);
       setSending(false);
     }
@@ -379,19 +476,14 @@ export default function ShopDitStudio() {
                   <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#f9a8d4]">
                     Brief
                   </p>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                  {msg.attachments?.length ? (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {msg.attachments.map((a, i) => (
-                        <span
-                          key={`${attachmentName(a)}-${i}`}
-                          className="rounded-full bg-white/12 px-2.5 py-0.5 text-[11px] text-white/85"
-                        >
-                          {attachmentKind(a) === "image" ? "Print" : "Ref"} · {attachmentName(a)}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
+                  <BriefMedia
+                    content={msg.content}
+                    attachments={(msg.attachments ?? []).map((a) => ({
+                      name: attachmentName(a),
+                      kind: attachmentKind(a),
+                      src: attachmentKind(a) === "image" ? attachmentSrc(a) : undefined,
+                    }))}
+                  />
                 </div>
               </div>
             ) : (
@@ -424,21 +516,25 @@ export default function ShopDitStudio() {
                       {msg.content}
                     </p>
                   ) : null}
-                  {msg.imageUrls?.map((filename) => (
-                    <figure
-                      key={filename}
-                      className="studio-print studio-img-in mt-4 overflow-hidden rounded-2xl p-2"
-                    >
-                      <img
-                        src={UPLOADS_URL + filename}
-                        alt="Studio print"
-                        className="max-h-80 w-full rounded-xl object-cover"
-                      />
-                      <figcaption className="px-1 pt-2 text-center text-[10px] uppercase tracking-[0.18em] text-black/35">
-                        Studio print
-                      </figcaption>
-                    </figure>
-                  ))}
+                  {msg.imageUrls?.length ? (
+                    <Image.PreviewGroup>
+                      {msg.imageUrls.map((filename) => (
+                        <figure
+                          key={filename}
+                          className="studio-print studio-img-in mt-4 overflow-hidden rounded-2xl p-2"
+                        >
+                          <PreviewableImage
+                            src={UPLOADS_URL + filename}
+                            alt="Studio print"
+                            variant="print"
+                          />
+                          <figcaption className="px-1 pt-2 text-center text-[10px] uppercase tracking-[0.18em] text-black/35">
+                            Studio print
+                          </figcaption>
+                        </figure>
+                      ))}
+                    </Image.PreviewGroup>
+                  ) : null}
                 </article>
               </div>
             )
@@ -450,7 +546,10 @@ export default function ShopDitStudio() {
                 <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#f9a8d4]">
                   Brief
                 </p>
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{pendingUser.content}</p>
+                <BriefMedia
+                  content={pendingUser.content}
+                  attachments={pendingUser.attachments}
+                />
               </div>
             </div>
           ) : null}
@@ -476,25 +575,6 @@ export default function ShopDitStudio() {
 
       <div className="relative z-10 px-4 pb-4 md:px-8 md:pb-5">
         <div className={`studio-dock mx-auto max-w-3xl rounded-[28px] p-3 ${imageMode ? "is-image" : ""}`}>
-          {pendingFiles.length > 0 && (
-            <div className="mb-2 flex flex-wrap gap-2 px-1">
-              {pendingFiles.map((f) => (
-                <span
-                  key={f.name + f.size}
-                  className="studio-chip-in inline-flex items-center gap-1 rounded-full bg-[#160d1c]/6 px-2.5 py-1 text-xs text-[#160d1c]"
-                >
-                  {f.name}
-                  <button
-                    type="button"
-                    onClick={() => setPendingFiles((list) => list.filter((x) => x !== f))}
-                    aria-label={`Remove ${f.name}`}
-                  >
-                    <CloseOutlined className="text-[10px]" />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
           <div className="mb-2 flex gap-1">
             <button
               type="button"
@@ -515,15 +595,64 @@ export default function ShopDitStudio() {
               Image
             </button>
           </div>
+          {pendingPreviews.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-2 px-1">
+              <Image.PreviewGroup>
+                {pendingPreviews
+                  .filter((item) => item.isImage)
+                  .map((item) => (
+                    <span
+                      key={item.file.name + item.file.size}
+                      className="relative inline-block"
+                    >
+                      <PreviewableImage
+                        src={item.url}
+                        alt={item.file.name}
+                        variant="dock"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPendingFiles((list) => list.filter((x) => x !== item.file))
+                        }
+                        className="absolute -right-1 -top-1 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-[#160d1c] text-white"
+                        aria-label={`Remove ${item.file.name}`}
+                      >
+                        <CloseOutlined className="text-[9px]" />
+                      </button>
+                    </span>
+                  ))}
+              </Image.PreviewGroup>
+              {pendingPreviews
+                .filter((item) => !item.isImage)
+                .map((item) => (
+                  <span
+                    key={item.file.name + item.file.size}
+                    className="studio-chip-in inline-flex items-center gap-1 rounded-full bg-[#160d1c]/6 px-2.5 py-1 text-xs text-[#160d1c]"
+                  >
+                    {item.file.name}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPendingFiles((list) => list.filter((x) => x !== item.file))
+                      }
+                      aria-label={`Remove ${item.file.name}`}
+                    >
+                      <CloseOutlined className="text-[10px]" />
+                    </button>
+                  </span>
+                ))}
+            </div>
+          )}
           <input
             ref={fileRef}
             type="file"
             multiple
-            accept=".pdf,.doc,.docx,.txt,image/*"
+            accept={imageMode ? "image/*" : ".pdf,.doc,.docx,.txt,image/*"}
             className="hidden"
             onChange={(e) => {
               const files = Array.from(e.target.files ?? []).slice(0, 5);
-                setPendingFiles((prev) => [...prev, ...files].slice(0, 5));
+              setPendingFiles((prev) => [...prev, ...files].slice(0, 5));
               e.target.value = "";
             }}
           />

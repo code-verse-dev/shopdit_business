@@ -228,13 +228,26 @@ export const aiService = createApi({
         tokensCharged: number;
         wallet: AiWallet;
       }>,
-      { conversationId: string; prompt: string; size?: string }
+      { conversationId: string; prompt: string; size?: string; files?: File[] }
     >({
-      query: ({ conversationId, prompt, size }) => ({
-        url: `/ai/conversations/${conversationId}/images`,
-        method: "POST",
-        body: { prompt, size: size || "1024x1024" },
-      }),
+      query: ({ conversationId, prompt, size, files }) => {
+        if (files?.length) {
+          const form = new FormData();
+          form.append("prompt", prompt);
+          form.append("size", size || "1024x1024");
+          files.forEach((file) => form.append("files", file));
+          return {
+            url: `/ai/conversations/${conversationId}/images`,
+            method: "POST",
+            body: form,
+          };
+        }
+        return {
+          url: `/ai/conversations/${conversationId}/images`,
+          method: "POST",
+          body: { prompt, size: size || "1024x1024" },
+        };
+      },
       invalidatesTags: (_res, _err, arg) => [
         "AiWallet",
         "AiConversations",
